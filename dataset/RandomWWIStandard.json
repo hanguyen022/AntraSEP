@@ -1,0 +1,16 @@
+{
+	"name": "RandomWWIStandard",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "wwiStandard",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "Application",
+			"table": "Cities"
+		}
+	}
+}
