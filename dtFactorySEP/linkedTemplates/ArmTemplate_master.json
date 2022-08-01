@@ -7,17 +7,25 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "dtFactorySEP"
 		},
-		"PurchaseDW_connectionString": {
+		"wwiStandard_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'PurchaseDW'"
+			"metadata": "Secure string for 'connectionString' of 'wwiStandard'"
+		},
+		"wwiODSadf_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'wwiODSadf'"
+		},
+		"PurchaseDWadf_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'PurchaseDWadf'"
 		},
 		"PurchaseODS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'PurchaseODS'"
 		},
-		"wwiStandard_connectionString": {
+		"PurchaseDW_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'wwiStandard'"
+			"metadata": "Secure string for 'connectionString' of 'PurchaseDW'"
 		},
 		"containerUri": {
 			"type": "string",
@@ -46,18 +54,44 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"PurchaseDW_connectionString": {
-						"value": "[parameters('PurchaseDW_connectionString')]"
+					"wwiStandard_connectionString": {
+						"value": "[parameters('wwiStandard_connectionString')]"
+					},
+					"wwiODSadf_connectionString": {
+						"value": "[parameters('wwiODSadf_connectionString')]"
+					},
+					"PurchaseDWadf_connectionString": {
+						"value": "[parameters('PurchaseDWadf_connectionString')]"
 					},
 					"PurchaseODS_connectionString": {
 						"value": "[parameters('PurchaseODS_connectionString')]"
 					},
-					"wwiStandard_connectionString": {
-						"value": "[parameters('wwiStandard_connectionString')]"
+					"PurchaseDW_connectionString": {
+						"value": "[parameters('PurchaseDW_connectionString')]"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "dtFactorySEP_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'dtFactorySEP_ArmTemplate_0')]"
+			]
 		}
 	]
 }

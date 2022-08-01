@@ -5,13 +5,19 @@
 		"factoryName": {
 			"value": "dtFactorySEP"
 		},
-		"PurchaseDW_connectionString": {
+		"wwiStandard_connectionString": {
+			"value": ""
+		},
+		"wwiODSadf_connectionString": {
+			"value": ""
+		},
+		"PurchaseDWadf_connectionString": {
 			"value": ""
 		},
 		"PurchaseODS_connectionString": {
 			"value": ""
 		},
-		"wwiStandard_connectionString": {
+		"PurchaseDW_connectionString": {
 			"value": ""
 		}
 	}
