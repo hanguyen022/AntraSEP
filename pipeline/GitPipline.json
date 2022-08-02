@@ -83,8 +83,18 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "RandomWWIStandard",
-									"type": "DatasetReference"
+									"referenceName": "OnlyPurchaseTables",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": {
+											"value": "@item().table_schema",
+											"type": "Expression"
+										},
+										"table": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										}
+									}
 								}
 							],
 							"outputs": [
