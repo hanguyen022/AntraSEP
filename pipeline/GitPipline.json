@@ -105,7 +105,7 @@
 							]
 						},
 						{
-							"name": "Data flow1",
+							"name": "AddSurrogate",
 							"type": "ExecuteDataFlow",
 							"dependsOn": [
 								{
@@ -144,7 +144,7 @@
 												"type": "Expression"
 											},
 											"table": {
-												"value": "@concat('Surrogate_',item())",
+												"value": "@concat('Surrogate_',item().table_name)",
 												"type": "Expression"
 											}
 										}
@@ -158,6 +158,38 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "CreateIntegration",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "CopyToPurchaseODS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "DECLARE @sql nvarchar(1000)\nDECLARE @sql2 nvarchar(max)\nSET @sql ='DROP SCHEMA IF EXISTS Integration'\nSET @sql2 = 'CREATE SCHEMA Integration'\nEXEC sp_executesql @sql\nEXEC sp_executesql @sql2\n\nSELECT s.SurKey as SupplierSKey\n\t, s.SupplierID\n\t, s.[SupplierName]\n\t, c.[SupplierCategoryName]\n\t, s.[PrimaryContactPersonID]\n\t, s.[SupplierReference]\n\t, s.[PaymentDays]\n\t, s.[PostalPostalCode]\n\t, s.[ValidFrom]\n\t, s.[ValidTo]\nINTO Integration.Suppliers\nFROM [Purchasing].[Surrogate_Suppliers] s\nLEFT JOIN Purchasing.Surrogate_SupplierCategories c \n\tON s.[SupplierCategoryID] = c.[SupplierCategoryID]\n\n\nSELECT ol.SurKey as PurchaseSKey\n\t, s.SurKey as SupplierSKey\n\t, o.[OrderDate]\n\t, o.[PurchaseOrderID]\n\t, ol.[OrderedOuters]\n\t, ol.[ReceivedOuters]\n\t, ol.[PackageTypeID]\n\t, o.[IsOrderFinalized]\n\t, o.[SupplierID]\n\t, ol.[StockItemID]\n\t, o.[LastEditedWhen]\nINTO Integration.Purchase\nFROM [Purchasing].[Surrogate_PurchaseOrderLines] ol\nLEFT JOIN Purchasing.Surrogate_PurchaseOrders o\n\tON ol.[PurchaseOrderID] = o.[PurchaseOrderID]\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON o.SupplierID = s.SupplierID\n\n\nSELECT t.SurKey as TransSKey\n\t, t.[TransactionDate]\n\t, s.SurKey as SupplierSKey\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\n\t, t.[SupplierID]\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[LastEditedWhen]\nINTO Integration.Transactions\nFROM [Purchasing].[Surrogate_SupplierTransactions] t\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON t.SupplierID = s.SupplierID\n\nSELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema = 'Integration'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "RandomPurchasing4Join",
+						"type": "DatasetReference"
+					}
 				}
 			}
 		],
