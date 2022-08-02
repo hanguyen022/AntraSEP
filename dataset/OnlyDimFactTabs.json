@@ -1,0 +1,63 @@
+{
+	"name": "OnlyDimFactTabs",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PurchaseODS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "SupplierSKey",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "SupplierID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SupplierName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SupplierCategoryName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PrimaryContactPersonID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SupplierReference",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PaymentDays",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PostalPostalCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ValidFrom",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "ValidTo",
+				"type": "datetime2",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"schema": "Dimension",
+			"table": "Suppliers"
+		}
+	}
+}

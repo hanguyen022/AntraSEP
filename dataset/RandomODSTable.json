@@ -1,0 +1,70 @@
+{
+	"name": "RandomODSTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PurchaseODS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "PurchaseSKey",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "SupplierSKey",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "OrderDate",
+				"type": "date"
+			},
+			{
+				"name": "PurchaseOrderID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "OrderedOuters",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ReceivedOuters",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PackageTypeID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "IsOrderFinalized",
+				"type": "bit"
+			},
+			{
+				"name": "SupplierID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "StockItemID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "LastEditedWhen",
+				"type": "datetime2",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"schema": "Integration",
+			"table": "Purchase"
+		}
+	}
+}
