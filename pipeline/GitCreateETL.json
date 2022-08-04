@@ -1,0 +1,26 @@
+{
+	"name": "GitCreateETL",
+	"properties": {
+		"activities": [
+			{
+				"name": "copy to DW",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "GitCreateETL",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}
