@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "updateSurrogate",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -9,53 +9,257 @@
 						"referenceName": "dimSuppliers",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "DimSup"
 				},
 				{
 					"dataset": {
-						"referenceName": "IntegrationSuppliers",
+						"referenceName": "Surrogate_Supplier",
 						"type": "DatasetReference"
 					},
-					"name": "source2"
+					"name": "SurrogatedSup"
+				},
+				{
+					"dataset": {
+						"referenceName": "surrogate_POLines",
+						"type": "DatasetReference"
+					},
+					"name": "SurrogatedPurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "factPurchase",
+						"type": "DatasetReference"
+					},
+					"name": "factPurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "surrogate_Transactions",
+						"type": "DatasetReference"
+					},
+					"name": "integrationTran"
+				},
+				{
+					"dataset": {
+						"referenceName": "factTransactions",
+						"type": "DatasetReference"
+					},
+					"name": "factTran"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "joinMaxVal"
+				},
+				{
+					"name": "UpdateSurrogateKey"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "UpdateSurrogate"
+				},
+				{
+					"name": "delMaxVal"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "updateSurrogateK"
+				},
+				{
+					"name": "select2"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
-				"          {Supplier Key} as integer,",
-				"          {WWI Supplier ID} as integer,",
-				"          Supplier as string,",
-				"          Category as string,",
-				"          {Primary Contact} as string,",
-				"          {Supplier Reference} as string,",
-				"          {Payment Days} as integer,",
-				"          {Postal Code} as string,",
-				"          {Valid From} as timestamp,",
-				"          {Valid To} as timestamp,",
-				"          {Lineage Key} as integer",
+				"          maxVal as integer",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source1",
+				"     query: 'Select max([Supplier Key]) as maxVal\\nFROM [Dimension].[Supplier]',",
+				"     format: 'query') ~> DimSup",
 				"source(output(",
-				"          SupplierSKey as long,",
 				"          SupplierID as integer,",
 				"          SupplierName as string,",
-				"          SupplierCategoryName as string,",
+				"          SupplierCategoryID as integer,",
 				"          PrimaryContactPersonID as integer,",
+				"          AlternateContactPersonID as integer,",
+				"          DeliveryMethodID as integer,",
+				"          DeliveryCityID as integer,",
+				"          PostalCityID as integer,",
 				"          SupplierReference as string,",
+				"          BankAccountName as string,",
+				"          BankAccountBranch as string,",
+				"          BankAccountCode as string,",
+				"          BankAccountNumber as string,",
+				"          BankInternationalCode as string,",
 				"          PaymentDays as integer,",
+				"          InternalComments as string,",
+				"          PhoneNumber as string,",
+				"          FaxNumber as string,",
+				"          WebsiteURL as string,",
+				"          DeliveryAddressLine1 as string,",
+				"          DeliveryAddressLine2 as string,",
+				"          DeliveryPostalCode as string,",
+				"          DeliveryLocation as binary,",
+				"          PostalAddressLine1 as string,",
+				"          PostalAddressLine2 as string,",
 				"          PostalPostalCode as string,",
+				"          LastEditedBy as integer,",
 				"          ValidFrom as timestamp,",
 				"          ValidTo as timestamp,",
-				"          IngestTime as string",
+				"          IngestTime as string,",
+				"          SurKey as long",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source2"
+				"     format: 'table') ~> SurrogatedSup",
+				"source(output(",
+				"          PurchaseOrderLineID as integer,",
+				"          PurchaseOrderID as integer,",
+				"          StockItemID as integer,",
+				"          OrderedOuters as integer,",
+				"          Description as string,",
+				"          ReceivedOuters as integer,",
+				"          PackageTypeID as integer,",
+				"          ExpectedUnitPricePerOuter as decimal(18,2),",
+				"          LastReceiptDate as date,",
+				"          IsOrderLineFinalized as boolean,",
+				"          LastEditedBy as integer,",
+				"          LastEditedWhen as timestamp,",
+				"          IngestTime as string,",
+				"          SurKey as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SurrogatedPurchase",
+				"source(output(",
+				"          maxVal as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max([Purchase Key]) as maxVal\\nFrom [Fact].[Purchase]',",
+				"     format: 'query') ~> factPurchase",
+				"source(output(",
+				"          SupplierTransactionID as integer,",
+				"          SupplierID as integer,",
+				"          TransactionTypeID as integer,",
+				"          PurchaseOrderID as integer,",
+				"          PaymentMethodID as integer,",
+				"          SupplierInvoiceNumber as string,",
+				"          TransactionDate as date,",
+				"          AmountExcludingTax as decimal(18,2),",
+				"          TaxAmount as decimal(18,2),",
+				"          TransactionAmount as decimal(18,2),",
+				"          OutstandingBalance as decimal(18,2),",
+				"          FinalizationDate as date,",
+				"          IsFinalized as boolean,",
+				"          LastEditedBy as integer,",
+				"          LastEditedWhen as timestamp,",
+				"          IngestTime as string,",
+				"          SurKey as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> integrationTran",
+				"source(output(",
+				"          MaxVal as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max([Transaction Key]) as MaxVal\\nfrom [Fact].[Transaction]',",
+				"     format: 'query') ~> factTran",
+				"SurrogatedSup, DimSup join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinMaxVal",
+				"joinMaxVal derive(SurKey = SurKey + maxVal) ~> UpdateSurrogateKey",
+				"UpdateSurrogateKey select(mapColumn(",
+				"          SupplierSKey = SurKey,",
+				"          SupplierID,",
+				"          SupplierName,",
+				"          SupplierCategoryName,",
+				"          PrimaryContactPersonID,",
+				"          SupplierReference,",
+				"          PaymentDays,",
+				"          PostalPostalCode,",
+				"          ValidFrom,",
+				"          ValidTo,",
+				"          IngestTime",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"SurrogatedPurchase, factPurchase join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 derive(SurKey = maxVal+SurKey) ~> UpdateSurrogate",
+				"UpdateSurrogate select(mapColumn(",
+				"          PurchaseSKey,",
+				"          SupplierSKey = SurKey,",
+				"          OrderDate,",
+				"          PurchaseOrderID,",
+				"          OrderedOuters,",
+				"          ReceivedOuters,",
+				"          PackageTypeID,",
+				"          IsOrderFinalized,",
+				"          SupplierID,",
+				"          StockItemID,",
+				"          LastEditedWhen,",
+				"          IngestTime",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> delMaxVal",
+				"integrationTran, factTran join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2 derive(SurKey = SurKey + MaxVal) ~> updateSurrogateK",
+				"updateSurrogateK select(mapColumn(",
+				"          SupplierTransactionID,",
+				"          SupplierID,",
+				"          TransactionTypeID,",
+				"          PurchaseOrderID,",
+				"          PaymentMethodID,",
+				"          SupplierInvoiceNumber,",
+				"          TransactionDate,",
+				"          AmountExcludingTax,",
+				"          TaxAmount,",
+				"          TransactionAmount,",
+				"          OutstandingBalance,",
+				"          FinalizationDate,",
+				"          IsFinalized,",
+				"          LastEditedBy,",
+				"          LastEditedWhen,",
+				"          IngestTime,",
+				"          SurKey",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
