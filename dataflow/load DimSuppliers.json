@@ -5,6 +5,10 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "integrationSupplier",
+						"type": "DatasetReference"
+					},
 					"name": "IntegratonSuppliers"
 				},
 				{
@@ -44,7 +48,7 @@
 				"          SupplierID as integer,",
 				"          SupplierName as string,",
 				"          SupplierCategoryName as string,",
-				"          PrimaryContactPersonID as string,",
+				"          PrimaryContactPersonID as integer,",
 				"          SupplierReference as string,",
 				"          PaymentDays as integer,",
 				"          PostalPostalCode as string,",
@@ -53,7 +57,9 @@
 				"          IngestTime as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
-				"     validateSchema: false) ~> IntegratonSuppliers",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> IntegratonSuppliers",
 				"source(output(",
 				"          {Supplier Key} as integer,",
 				"          {WWI Supplier ID} as integer,",
