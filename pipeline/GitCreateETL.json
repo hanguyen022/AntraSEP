@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "LookupPurchaseTables",
+				"name": "Lookup1",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -17,7 +17,6 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "SELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing'\n",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},

@@ -17,12 +17,14 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
+
 						"sqlReaderQuery": "SELECT *\nINTO Dimension.Suppliers\nFROM Integration.Suppliers \n\n\nSELECT p.PurchaseSKey\n\t, p.[OrderDate]\n\t, p.SupplierSKey\n\t, p.[StockItemID]\n\t, p.[PurchaseOrderID]\n\t, p.[OrderedOuters]\n\t, p.[ReceivedOuters]\n\t, p.[PackageTypeID]\n\t, p.[IsOrderFinalized]\nINTO Fact.Purchase\nFROM Integration.Purchase p\n\n\nSELECT t.TransSKey\n\t, t.[TransactionDate]\n\t, t.SupplierSKey\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\nINTO Fact.Transactions\nFROM Integration.Transactions t\n\nSELECT * FROM Fact.Transactions\nSELECT * FROM Dimension.Suppliers\n\n\n\n",
+
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
 					"dataset": {
-						"referenceName": "RandomODSTable",
+						"referenceName": "integrationSupplier",
 						"type": "DatasetReference"
 					}
 				}
