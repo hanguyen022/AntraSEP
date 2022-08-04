@@ -2,15 +2,11 @@
 	"name": "IntegrationSup",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "PurchaseODS",
+			"referenceName": "PurchaseIntegration",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
-		"schema": [],
-		"typeProperties": {
-			"schema": "Purchasing",
-			"table": "Surrogate_Suppliers"
-		}
+		"schema": []
 	}
 }
