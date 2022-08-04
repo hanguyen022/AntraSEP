@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "CreateDimFact",
+				"name": "Select integration tables",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "DECLARE @sql0 NVARCHAR(max)=''\nSELECT @sql0 += ' Drop table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  Table_schema = 'Dimension' or Table_schema = 'Fact'\nExec Sp_executesql @sql0\n\nDECLARE @sql nvarchar(max)\nDECLARE @sql2 nvarchar(max)\nSET @sql = 'drop schema if exists Dimension GO create schema Dimension'\nSET @sql2 = 'drop schema if exists Fact GO create schema Fact'\nEXEC sp_executesql @sql\nEXEC sp_executesql @sql2\n\nSELECT *\nINTO Dimension.Suppliers\nFROM Integration.Suppliers \n\n\nSELECT p.PurchaseSKey\n\t, p.[OrderDate]\n\t, p.SupplierSKey\n\t, p.[StockItemID]\n\t, p.[PurchaseOrderID]\n\t, p.[OrderedOuters]\n\t, p.[ReceivedOuters]\n\t, p.[PackageTypeID]\n\t, p.[IsOrderFinalized]\nINTO Fact.Purchase\nFROM Integration.Purchase p\n\n\nSELECT t.TransSKey\n\t, t.[TransactionDate]\n\t, t.SupplierSKey\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\nINTO Fact.Transactions\nFROM Integration.Transactions t\n\nSELECT * FROM Fact.Transactions\nSELECT * FROM Dimension.Suppliers\n\n\n\n",
+						"sqlReaderQuery": "SELECT *\nINTO Dimension.Suppliers\nFROM Integration.Suppliers \n\n\nSELECT p.PurchaseSKey\n\t, p.[OrderDate]\n\t, p.SupplierSKey\n\t, p.[StockItemID]\n\t, p.[PurchaseOrderID]\n\t, p.[OrderedOuters]\n\t, p.[ReceivedOuters]\n\t, p.[PackageTypeID]\n\t, p.[IsOrderFinalized]\nINTO Fact.Purchase\nFROM Integration.Purchase p\n\n\nSELECT t.TransSKey\n\t, t.[TransactionDate]\n\t, t.SupplierSKey\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\nINTO Fact.Transactions\nFROM Integration.Transactions t\n\nSELECT * FROM Fact.Transactions\nSELECT * FROM Dimension.Suppliers\n\n\n\n",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -32,7 +32,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "CreateDimFact",
+						"activity": "Select integration tables",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -41,7 +41,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('CreateDimFact').output",
+						"value": "@activity('Select integration tables').output",
 						"type": "Expression"
 					},
 					"activities": [
@@ -60,7 +60,7 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderQuery": "SELECT table_schema, table_name\nFROM information_schema.TABLES \nWHERE table_schema = 'Dimension' OR table_schema = 'Fact'",
+									"sqlReaderQuery": "SELECT table_schema, table_name\nFROM information_schema.TABLES \nWHERE table_schema= 'Integration';",
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -81,7 +81,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "OnlyDimFactTabs",
+									"referenceName": "integrationTabs",
 									"type": "DatasetReference"
 								}
 							],
