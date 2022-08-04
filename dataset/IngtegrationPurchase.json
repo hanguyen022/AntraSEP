@@ -67,8 +67,8 @@
 			}
 		],
 		"typeProperties": {
-			"schema": "Integration",
-			"table": "Purchase"
+			"schema": "Purchasing",
+			"table": "Surrogate_PurchaseOrderLines"
 		}
 	}
 }

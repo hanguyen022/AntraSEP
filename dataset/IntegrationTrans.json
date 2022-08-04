@@ -90,8 +90,8 @@
 			}
 		],
 		"typeProperties": {
-			"schema": "Integration",
-			"table": "Transactions"
+			"schema": "Purchasing",
+			"table": "Surrogate_SupplierTransactions"
 		}
 	}
 }

@@ -9,8 +9,8 @@
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "Integration",
-			"table": "Suppliers"
+			"schema": "Purchasing",
+			"table": "Surrogate_Suppliers"
 		}
 	}
 }
