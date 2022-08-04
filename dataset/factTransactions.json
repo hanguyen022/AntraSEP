@@ -1,0 +1,108 @@
+{
+	"name": "factTransactions",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PurchaseDW",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Transaction Key",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Date Key",
+				"type": "date"
+			},
+			{
+				"name": "Customer Key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Bill To Customer Key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Supplier Key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Transaction Type Key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Payment Method Key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WWI Customer Transaction ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WWI Supplier Transaction ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WWI Invoice ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WWI Purchase Order ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Supplier Invoice Number",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Total Excluding Tax",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Tax Amount",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Total Including Tax",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Outstanding Balance",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Is Finalized",
+				"type": "bit"
+			},
+			{
+				"name": "Lineage Key",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "Fact",
+			"table": "Transaction"
+		}
+	}
+}

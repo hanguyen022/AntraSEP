@@ -1,0 +1,97 @@
+{
+	"name": "IntegrationTrans",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PurchaseODS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "TransSKey",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "TransactionDate",
+				"type": "date"
+			},
+			{
+				"name": "SupplierSKey",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "SupplierTransactionID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PurchaseOrderID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SupplierInvoiceNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "AmountExcludingTax",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "TaxAmount",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "TransactionAmount",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "OutstandingBalance",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "IsFinalized",
+				"type": "bit"
+			},
+			{
+				"name": "SupplierID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TransactionTypeID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PaymentMethodID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "LastEditedWhen",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "IngestTime",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Purchasing",
+			"table": "Surrogate_SupplierTransactions"
+		}
+	}
+}
