@@ -47,7 +47,29 @@
 					"name": "factTran"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "IntegrationSup",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "IngtegrationPurchase",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				},
+				{
+					"dataset": {
+						"referenceName": "IntegrationTrans",
+						"type": "DatasetReference"
+					},
+					"name": "sink3"
+				}
+			],
 			"transformations": [
 				{
 					"name": "joinMaxVal"
@@ -273,7 +295,69 @@
 				"          SurKey",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2"
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1",
+				"delMaxVal sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          PurchaseSKey as long,",
+				"          SupplierSKey as long,",
+				"          OrderDate as date,",
+				"          PurchaseOrderID as integer,",
+				"          OrderedOuters as integer,",
+				"          ReceivedOuters as integer,",
+				"          PackageTypeID as integer,",
+				"          IsOrderFinalized as boolean,",
+				"          SupplierID as integer,",
+				"          StockItemID as integer,",
+				"          LastEditedWhen as timestamp,",
+				"          IngestTime as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink2",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          TransSKey as long,",
+				"          TransactionDate as date,",
+				"          SupplierSKey as long,",
+				"          SupplierTransactionID as integer,",
+				"          PurchaseOrderID as integer,",
+				"          SupplierInvoiceNumber as string,",
+				"          AmountExcludingTax as decimal(18,2),",
+				"          TaxAmount as decimal(18,2),",
+				"          TransactionAmount as decimal(18,2),",
+				"          OutstandingBalance as decimal(18,2),",
+				"          IsFinalized as boolean,",
+				"          SupplierID as integer,",
+				"          TransactionTypeID as integer,",
+				"          PaymentMethodID as integer,",
+				"          LastEditedWhen as timestamp,",
+				"          IngestTime as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink3"
 			]
 		}
 	}
