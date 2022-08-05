@@ -78,7 +78,7 @@
 		],
 		"typeProperties": {
 			"schema": "Purchasing",
-			"table": "Surrogate_PurchaseOrderLines"
+			"table": "PurchaseOrderLines"
 		}
 	}
 }
