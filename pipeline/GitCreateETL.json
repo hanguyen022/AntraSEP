@@ -220,48 +220,6 @@
 					},
 					"firstRowOnly": false
 				}
-			},
-			{
-				"name": "updateSurrogate",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "CopyToPurchaseODS",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "1.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "updateSurrogate",
-						"type": "DataFlowReference",
-						"datasetParameters": {
-							"SurrogatedSup": {
-								"schema": "Purchasing",
-								"table": "Surrogate_Suppliers"
-							},
-							"SurrogatedPurchase": {
-								"schema": "Purchasing",
-								"table": "Surrogate_PurchaseOrderLines"
-							}
-						}
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine",
-					"runConcurrently": true
-				}
 			}
 		],
 		"annotations": []
