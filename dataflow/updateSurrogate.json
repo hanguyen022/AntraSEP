@@ -13,17 +13,17 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "Surrogate_Supplier",
+						"referenceName": "odsSupplier",
 						"type": "DatasetReference"
 					},
-					"name": "SurrogatedSup"
+					"name": "odsSupplier"
 				},
 				{
 					"dataset": {
-						"referenceName": "addSurrogate_Sink",
+						"referenceName": "odsPOLines",
 						"type": "DatasetReference"
 					},
-					"name": "SurrogatedPurchase"
+					"name": "odsPurchase"
 				},
 				{
 					"dataset": {
@@ -34,10 +34,10 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "surrogate_Transactions",
+						"referenceName": "odsTransactions",
 						"type": "DatasetReference"
 					},
-					"name": "integrationTran"
+					"name": "odsTransactions"
 				},
 				{
 					"dataset": {
@@ -50,21 +50,21 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "Surrogate_Supplier",
+						"referenceName": "odsSupplier",
 						"type": "DatasetReference"
 					},
 					"name": "updatedSurSup"
 				},
 				{
 					"dataset": {
-						"referenceName": "surrogate_POLines",
+						"referenceName": "odsPOLines",
 						"type": "DatasetReference"
 					},
 					"name": "sink2"
 				},
 				{
 					"dataset": {
-						"referenceName": "surrogate_Transactions",
+						"referenceName": "odsTransactions",
 						"type": "DatasetReference"
 					},
 					"name": "sink3"
@@ -97,6 +97,15 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "surrogateKey2"
+				},
+				{
+					"name": "surrogateKey3"
+				},
+				{
+					"name": "surrogateKey1"
 				}
 			],
 			"scriptLines": [
@@ -145,7 +154,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select * \\nfrom purchasing.surrogate_suppliers',",
-				"     format: 'query') ~> SurrogatedSup",
+				"     format: 'query') ~> odsSupplier",
 				"source(output(",
 				"          SurKey as long,",
 				"          PurchaseOrderLineID as integer,",
@@ -166,7 +175,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'Select *\\nFrom Purchasing.Surrogate_PurchaseOrderLines',",
-				"     format: 'query') ~> SurrogatedPurchase",
+				"     format: 'query') ~> odsPurchase",
 				"source(output(",
 				"          maxVal as long",
 				"     ),",
@@ -197,7 +206,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> integrationTran",
+				"     format: 'table') ~> odsTransactions",
 				"source(output(",
 				"          MaxVal as long",
 				"     ),",
@@ -206,12 +215,12 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select max([Transaction Key]) as MaxVal\\nfrom [Fact].[Transaction]',",
 				"     format: 'query') ~> factTran",
-				"SurrogatedSup, DimSup join(1==1,",
+				"odsSupplier, DimSup join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> joinMaxVal",
-				"joinMaxVal derive(SurKey = SurKey + maxVal) ~> UpdateSurrogateKey",
+				"surrogateKey1 derive(SurKey = SurKey + maxVal) ~> UpdateSurrogateKey",
 				"UpdateSurrogateKey select(mapColumn(",
 				"          SurKey,",
 				"          SupplierID,",
@@ -247,12 +256,12 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"SurrogatedPurchase, factPurchase join(1==1,",
+				"odsPurchase, factPurchase join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1 derive(SurKey = maxVal+SurKey) ~> UpdateSurrogate",
+				"surrogateKey2 derive(SurKey = maxVal+SurKey) ~> UpdateSurrogate",
 				"UpdateSurrogate select(mapColumn(",
 				"          SurKey,",
 				"          PurchaseOrderLineID,",
@@ -271,12 +280,12 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> delMaxVal",
-				"integrationTran, factTran join(1==1,",
+				"odsTransactions, factTran join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"join2 derive(SurKey = SurKey + MaxVal) ~> updateSurrogateK",
+				"surrogateKey3 derive(SurKey = SurKey + MaxVal) ~> updateSurrogateK",
 				"updateSurrogateK select(mapColumn(",
 				"          SurKey,",
 				"          SupplierTransactionID,",
@@ -298,6 +307,15 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"join1 keyGenerate(output(SurKey as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey2",
+				"join2 keyGenerate(output(SurKey as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey3",
+				"joinMaxVal keyGenerate(output(SurKey as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
 				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",

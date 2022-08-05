@@ -1,5 +1,5 @@
 {
-	"name": "surrogate_POLines",
+	"name": "odsPOLines",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "PurchaseODS",

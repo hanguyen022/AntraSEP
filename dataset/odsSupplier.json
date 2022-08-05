@@ -1,5 +1,5 @@
 {
-	"name": "Surrogate_Supplier",
+	"name": "odsSupplier",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "PurchaseODS",
