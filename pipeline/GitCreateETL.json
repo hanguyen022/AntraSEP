@@ -146,14 +146,8 @@
 											}
 										},
 										"SurrogatedTables": {
-											"schema": {
-												"value": "@item().table_schema",
-												"type": "Expression"
-											},
-											"table": {
-												"value": "@concat('Surrogate_',item().table_name)",
-												"type": "Expression"
-											}
+											"schema": "@item().table_schema",
+											"table": "@concat('Surrogate_',item().table_name)"
 										}
 									}
 								},
