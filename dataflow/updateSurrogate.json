@@ -13,14 +13,14 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "Surrogate_Supplier",
+						"referenceName": "addSurrogate_Sink",
 						"type": "DatasetReference"
 					},
 					"name": "SurrogatedSup"
 				},
 				{
 					"dataset": {
-						"referenceName": "surrogate_POLines",
+						"referenceName": "addSurrogate_Sink",
 						"type": "DatasetReference"
 					},
 					"name": "SurrogatedPurchase"
@@ -109,6 +109,7 @@
 				"     query: 'Select max([Supplier Key]) as maxVal\\nFROM [Dimension].[Supplier]',",
 				"     format: 'query') ~> DimSup",
 				"source(output(",
+				"          SurKey as long,",
 				"          SupplierID as integer,",
 				"          SupplierName as string,",
 				"          SupplierCategoryID as integer,",
@@ -138,14 +139,15 @@
 				"          LastEditedBy as integer,",
 				"          ValidFrom as timestamp,",
 				"          ValidTo as timestamp,",
-				"          IngestTime as string,",
-				"          SurKey as long",
+				"          IngestTime as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> SurrogatedSup",
+				"     query: 'select * \\nfrom purchasing.surrogate_suppliers',",
+				"     format: 'query') ~> SurrogatedSup",
 				"source(output(",
+				"          SurKey as long,",
 				"          PurchaseOrderLineID as integer,",
 				"          PurchaseOrderID as integer,",
 				"          StockItemID as integer,",
@@ -158,13 +160,13 @@
 				"          IsOrderLineFinalized as boolean,",
 				"          LastEditedBy as integer,",
 				"          LastEditedWhen as timestamp,",
-				"          IngestTime as string,",
-				"          SurKey as long",
+				"          IngestTime as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> SurrogatedPurchase",
+				"     query: 'Select *\\nFrom Purchasing.Surrogate_PurchaseOrderLines',",
+				"     format: 'query') ~> SurrogatedPurchase",
 				"source(output(",
 				"          maxVal as long",
 				"     ),",

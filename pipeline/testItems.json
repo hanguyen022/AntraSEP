@@ -1,5 +1,5 @@
 {
-	"name": "copy to DW",
+	"name": "testItems",
 	"properties": {
 		"activities": [
 			{
@@ -17,9 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-
 						"sqlReaderQuery": "SELECT *\nINTO Dimension.Suppliers\nFROM Integration.Suppliers \n\n\nSELECT p.PurchaseSKey\n\t, p.[OrderDate]\n\t, p.SupplierSKey\n\t, p.[StockItemID]\n\t, p.[PurchaseOrderID]\n\t, p.[OrderedOuters]\n\t, p.[ReceivedOuters]\n\t, p.[PackageTypeID]\n\t, p.[IsOrderFinalized]\nINTO Fact.Purchase\nFROM Integration.Purchase p\n\n\nSELECT t.TransSKey\n\t, t.[TransactionDate]\n\t, t.SupplierSKey\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\nINTO Fact.Transactions\nFROM Integration.Transactions t\n\nSELECT * FROM Fact.Transactions\nSELECT * FROM Dimension.Suppliers\n\n\n\n",
-
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -71,40 +69,65 @@
 									"writeBehavior": "insert",
 									"sqlWriterUseTableLock": false
 								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
+								"enableStaging": false
 							},
 							"inputs": [
 								{
 									"referenceName": "integrationTabs",
 									"type": "DatasetReference"
 								}
-							],
-							"outputs": [
-								{
-									"referenceName": "PurchaseDW",
-									"type": "DatasetReference",
-									"parameters": {
-										"schema": {
-											"value": "@item().table_schema",
-											"type": "Expression"
-										},
-										"table": {
-											"value": "@item().table_name",
-											"type": "Expression"
-										}
-									}
-								}
 							]
 						}
 					]
+				}
+			},
+			{
+				"name": "CreateIntegration",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "DECLARE @sql0 NVARCHAR(max)=''\nSELECT @sql0 += ' Drop table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  table_schema = 'Integration'\nExec Sp_executesql @sql0\n\nDECLARE @sql nvarchar(max)\nDECLARE @sql2 nvarchar(max)\nSET @sql ='DROP SCHEMA IF EXISTS Integration'\nSET @sql2 = 'CREATE SCHEMA Integration'\nEXEC sp_executesql @sql\nEXEC sp_executesql @sql2\n\nSELECT s.SurKey as SupplierSKey\n\t, s.SupplierID\n\t, s.[SupplierName]\n\t, c.[SupplierCategoryName]\n\t, s.[PrimaryContactPersonID]\n\t, s.[SupplierReference]\n\t, s.[PaymentDays]\n\t, s.[PostalPostalCode]\n\t, s.[ValidFrom]\n\t, s.[ValidTo]\n\t, s.[IngestTime]\nINTO Integration.Suppliers\nFROM [Purchasing].[Surrogate_Suppliers] s\nLEFT JOIN Purchasing.Surrogate_SupplierCategories c \n\tON s.[SupplierCategoryID] = c.[SupplierCategoryID]\n\n\nSELECT ol.SurKey as PurchaseSKey\n\t, s.SurKey as SupplierSKey\n\t, o.[OrderDate]\n\t, o.[PurchaseOrderID]\n\t, ol.[OrderedOuters]\n\t, ol.[ReceivedOuters]\n\t, ol.[PackageTypeID]\n\t, o.[IsOrderFinalized]\n\t, o.[SupplierID]\n\t, ol.[StockItemID]\n\t, o.[LastEditedWhen]\n\t, ol.IngestTime\nINTO Integration.Purchase\nFROM [Purchasing].[Surrogate_PurchaseOrderLines] ol\nLEFT JOIN Purchasing.Surrogate_PurchaseOrders o\n\tON ol.[PurchaseOrderID] = o.[PurchaseOrderID]\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON o.SupplierID = s.SupplierID\n\n\nSELECT t.SurKey as TransSKey\n\t, t.[TransactionDate]\n\t, s.SurKey as SupplierSKey\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\n\t, t.[SupplierID]\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[LastEditedWhen]\n\t, t.IngestTime\nINTO Integration.Transactions\nFROM [Purchasing].[Surrogate_SupplierTransactions] t\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON t.SupplierID = s.SupplierID\n\nSELECT * \nFrom Integration.Suppliers",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "IngtegrationPurchase",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "TruncateStaging",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "CopyToODSOutput",
+						"type": "DatasetReference"
+					}
 				}
 			}
 		],
