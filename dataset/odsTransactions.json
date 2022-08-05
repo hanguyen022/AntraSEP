@@ -95,7 +95,7 @@
 		],
 		"typeProperties": {
 			"schema": "Purchasing",
-			"table": "Surrogate_SupplierTransactions"
+			"table": "SupplierTransactions"
 		}
 	}
 }
