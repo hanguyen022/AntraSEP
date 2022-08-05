@@ -13,7 +13,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "addSurrogate_Sink",
+						"referenceName": "Surrogate_Supplier",
 						"type": "DatasetReference"
 					},
 					"name": "SurrogatedSup"
@@ -109,7 +109,6 @@
 				"     query: 'Select max([Supplier Key]) as maxVal\\nFROM [Dimension].[Supplier]',",
 				"     format: 'query') ~> DimSup",
 				"source(output(",
-				"          SurKey as long,",
 				"          SupplierID as integer,",
 				"          SupplierName as string,",
 				"          SupplierCategoryID as integer,",
@@ -139,7 +138,8 @@
 				"          LastEditedBy as integer,",
 				"          ValidFrom as timestamp,",
 				"          ValidTo as timestamp,",
-				"          IngestTime as string",
+				"          IngestTime as string,",
+				"          SurKey as long",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -337,7 +337,6 @@
 				"     insertable:true,",
 				"     updateable:false,",
 				"     upsertable:false,",
-				"     recreate:true,",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
