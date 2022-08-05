@@ -43,10 +43,7 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError',",
-				"     mapColumn(",
-				"          SurKey",
-				"     )) ~> SurrogatedTables"
+				"     errorHandlingOption: 'stopOnFirstError') ~> SurrogatedTables"
 			]
 		}
 	}
