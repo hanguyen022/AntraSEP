@@ -13,14 +13,14 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "odsSupplier",
+						"referenceName": "surSupplier",
 						"type": "DatasetReference"
 					},
 					"name": "odsSupplier"
 				},
 				{
 					"dataset": {
-						"referenceName": "odsPOLines",
+						"referenceName": "surPOLines",
 						"type": "DatasetReference"
 					},
 					"name": "odsPurchase"
@@ -34,7 +34,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "odsTransactions",
+						"referenceName": "surTransactions",
 						"type": "DatasetReference"
 					},
 					"name": "odsTransactions"
@@ -50,21 +50,21 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "odsSupplier",
+						"referenceName": "surSupplier",
 						"type": "DatasetReference"
 					},
 					"name": "updatedSurSup"
 				},
 				{
 					"dataset": {
-						"referenceName": "odsPOLines",
+						"referenceName": "surPOLines",
 						"type": "DatasetReference"
 					},
 					"name": "sink2"
 				},
 				{
 					"dataset": {
-						"referenceName": "odsTransactions",
+						"referenceName": "surTransactions",
 						"type": "DatasetReference"
 					},
 					"name": "sink3"
@@ -97,15 +97,6 @@
 				},
 				{
 					"name": "select2"
-				},
-				{
-					"name": "surrogateKey2"
-				},
-				{
-					"name": "surrogateKey3"
-				},
-				{
-					"name": "surrogateKey1"
 				}
 			],
 			"scriptLines": [
@@ -220,7 +211,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> joinMaxVal",
-				"surrogateKey1 derive(SurKey = SurKey + maxVal) ~> UpdateSurrogateKey",
+				"joinMaxVal derive(SurKey = SurKey + maxVal) ~> UpdateSurrogateKey",
 				"UpdateSurrogateKey select(mapColumn(",
 				"          SurKey,",
 				"          SupplierID,",
@@ -261,7 +252,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"surrogateKey2 derive(SurKey = maxVal+SurKey) ~> UpdateSurrogate",
+				"join1 derive(SurKey = maxVal+SurKey) ~> UpdateSurrogate",
 				"UpdateSurrogate select(mapColumn(",
 				"          SurKey,",
 				"          PurchaseOrderLineID,",
@@ -285,7 +276,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"surrogateKey3 derive(SurKey = SurKey + MaxVal) ~> updateSurrogateK",
+				"join2 derive(SurKey = SurKey + MaxVal) ~> updateSurrogateK",
 				"updateSurrogateK select(mapColumn(",
 				"          SurKey,",
 				"          SupplierTransactionID,",
@@ -307,15 +298,6 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"join1 keyGenerate(output(SurKey as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey2",
-				"join2 keyGenerate(output(SurKey as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey3",
-				"joinMaxVal keyGenerate(output(SurKey as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey1",
 				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
