@@ -1,5 +1,5 @@
 {
-	"name": "updateSurrogate",
+	"name": "updateSurrogate SS different",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -16,14 +16,14 @@
 						"referenceName": "surSupplier",
 						"type": "DatasetReference"
 					},
-					"name": "odsSupplier"
+					"name": "surSupplier"
 				},
 				{
 					"dataset": {
 						"referenceName": "surPOLines",
 						"type": "DatasetReference"
 					},
-					"name": "odsPurchase"
+					"name": "surPurchase"
 				},
 				{
 					"dataset": {
@@ -37,7 +37,7 @@
 						"referenceName": "surTransactions",
 						"type": "DatasetReference"
 					},
-					"name": "odsTransactions"
+					"name": "surTransactions"
 				},
 				{
 					"dataset": {
@@ -145,7 +145,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select * \\nfrom purchasing.surrogate_suppliers',",
-				"     format: 'query') ~> odsSupplier",
+				"     format: 'query') ~> surSupplier",
 				"source(output(",
 				"          SurKey as long,",
 				"          PurchaseOrderLineID as integer,",
@@ -166,7 +166,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'Select *\\nFrom Purchasing.Surrogate_PurchaseOrderLines',",
-				"     format: 'query') ~> odsPurchase",
+				"     format: 'query') ~> surPurchase",
 				"source(output(",
 				"          maxVal as long",
 				"     ),",
@@ -197,7 +197,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> odsTransactions",
+				"     format: 'table') ~> surTransactions",
 				"source(output(",
 				"          MaxVal as long",
 				"     ),",
@@ -206,7 +206,7 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select max([Transaction Key]) as MaxVal\\nfrom [Fact].[Transaction]',",
 				"     format: 'query') ~> factTran",
-				"odsSupplier, DimSup join(1==1,",
+				"surSupplier, DimSup join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -248,7 +248,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"odsPurchase, factPurchase join(1==1,",
+				"surPurchase, factPurchase join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -273,7 +273,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> delMaxVal",
-				"odsTransactions, factTran join(1==1,",
+				"surTransactions, factTran join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
