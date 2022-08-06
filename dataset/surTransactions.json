@@ -1,5 +1,5 @@
 {
-	"name": "odsTransactions",
+	"name": "surTransactions",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "PurchaseODS",
@@ -95,7 +95,7 @@
 		],
 		"typeProperties": {
 			"schema": "Purchasing",
-			"table": "SupplierTransactions"
+			"table": "Surrogate_SupplierTransactions"
 		}
 	}
 }
