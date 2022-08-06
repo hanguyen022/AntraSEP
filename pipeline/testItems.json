@@ -107,6 +107,46 @@
 				}
 			},
 			{
+				"name": "addSurrogate",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "addSurrogate",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"schema": {
+									"value": "@item().table_schema",
+									"type": "Expression"
+								},
+								"table": {
+									"value": "@item().table_name",
+									"type": "Expression"
+								}
+							},
+							"SurrogatedTables": {
+								"schema": "@item().table_schema",
+								"table": "@concat('Surrogate_',item().table_name)"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
 				"name": "TruncateStaging",
 				"type": "Lookup",
 				"dependsOn": [],
@@ -122,31 +162,6 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": "\nDECLARE @sql NVARCHAR(max)=''\n\nSELECT @sql += ' Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nExec Sp_executesql @sql\n\nSelect * from INFORMATION_SCHEMA.TABLES",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "CopyToODSOutput",
-						"type": "DatasetReference"
-					}
-				}
-			},
-			{
-				"name": "TruncateTables",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": "\nDECLARE @sql NVARCHAR(max)=''\n\nSELECT @sql += 'Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nExec Sp_executesql @sql\n\nSelect *\nFROM   INFORMATION_SCHEMA.TABLES",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
