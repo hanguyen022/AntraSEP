@@ -88,6 +88,10 @@
 				"name": "IngestTime",
 				"type": "nvarchar"
 			}
-		]
+		],
+		"typeProperties": {
+			"schema": "Integration",
+			"table": "Transactions"
+		}
 	}
 }
