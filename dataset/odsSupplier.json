@@ -147,7 +147,7 @@
 		],
 		"typeProperties": {
 			"schema": "Purchasing",
-			"table": "Suppliers"
+			"table": "Surrogate_Suppliers"
 		}
 	}
 }
