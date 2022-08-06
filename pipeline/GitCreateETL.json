@@ -23,7 +23,14 @@
 						{
 							"name": "CopyToODS",
 							"type": "Copy",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "TruncateStaging",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -112,18 +119,11 @@
 							]
 						},
 						{
-							"name": "addSurrogate",
-							"type": "ExecuteDataFlow",
-							"dependsOn": [
-								{
-									"activity": "CopyToODS",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"name": "TruncateStaging",
+							"type": "Lookup",
+							"dependsOn": [],
 							"policy": {
-								"timeout": "1.00:00:00",
+								"timeout": "7.00:00:00",
 								"retry": 0,
 								"retryIntervalInSeconds": 30,
 								"secureOutput": false,
@@ -131,31 +131,26 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"dataflow": {
-									"referenceName": "addSurrogate",
-									"type": "DataFlowReference",
-									"datasetParameters": {
-										"source1": {
-											"schema": {
-												"value": "@item().table_schema",
-												"type": "Expression"
-											},
-											"table": {
-												"value": "@item().table_name",
-												"type": "Expression"
-											}
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "\nDECLARE @sql NVARCHAR(max)=''\n\nSELECT @sql += ' Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nExec Sp_executesql @sql\n\nSelect * from INFORMATION_SCHEMA.TABLES",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "CopyToODSOutput",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": {
+											"value": "@item().table_schema",
+											"type": "Expression"
 										},
-										"SurrogatedTables": {
-											"schema": "@item().table_schema",
-											"table": "@concat('Surrogate_',item().table_name)"
+										"table": {
+											"value": "@item().table_name",
+											"type": "Expression"
 										}
 									}
-								},
-								"compute": {
-									"coreCount": 8,
-									"computeType": "General"
-								},
-								"traceLevel": "Fine"
+								}
 							}
 						}
 					]
