@@ -2,7 +2,7 @@
 	"name": "integrationSupplier",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "PurchaseODS",
+			"referenceName": "PurchaseIntegration",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
