@@ -2,7 +2,7 @@
 	"name": "IntegrationTrans",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "PurchaseODS",
+			"referenceName": "PurchaseIntegration",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
@@ -88,10 +88,6 @@
 				"name": "IngestTime",
 				"type": "nvarchar"
 			}
-		],
-		"typeProperties": {
-			"schema": "Purchasing",
-			"table": "Surrogate_SupplierTransactions"
-		}
+		]
 	}
 }
