@@ -119,6 +119,53 @@
 							]
 						},
 						{
+							"name": "addSurrogate",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [
+								{
+									"activity": "CopyToODS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "addSurrogate",
+									"type": "DataFlowReference",
+									"datasetParameters": {
+										"source1": {
+											"schema": {
+												"value": "@item().table_schema",
+												"type": "Expression"
+											},
+											"table": {
+												"value": "@item().table_name",
+												"type": "Expression"
+											}
+										},
+										"SurrogatedTables": {
+											"schema": "@item().table_schema",
+											"table": "@concat('Surrogate_',item().table_name)"
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								},
+								"traceLevel": "Fine"
+							}
+						},
+						{
 							"name": "TruncateStaging",
 							"type": "Lookup",
 							"dependsOn": [],
@@ -180,6 +227,37 @@
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "updateSurrogate SS different",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "CopyToPurchaseODS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "updateSurrogate SS different",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
 				}
 			}
 		],
