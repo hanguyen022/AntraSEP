@@ -1,5 +1,5 @@
 {
-	"name": "integrationTabs",
+	"name": "RandomODSTab",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "PurchaseODS",
@@ -67,8 +67,8 @@
 			}
 		],
 		"typeProperties": {
-			"schema": "Integration",
-			"table": "Purchase"
+			"schema": "Purchasing",
+			"table": "PurchaseOrderLines"
 		}
 	}
 }
