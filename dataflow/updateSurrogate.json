@@ -1,5 +1,5 @@
 {
-	"name": "updateSurrogate SS different",
+	"name": "updateSurrogate",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {

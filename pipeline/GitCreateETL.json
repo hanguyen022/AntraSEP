@@ -230,7 +230,7 @@
 				}
 			},
 			{
-				"name": "updateSurrogate SS different",
+				"name": "updateSurrogate",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
@@ -250,7 +250,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "updateSurrogate SS different",
+						"referenceName": "updateSurrogate",
 						"type": "DataFlowReference"
 					},
 					"compute": {
