@@ -1,5 +1,5 @@
 {
-	"name": "randomODStab",
+	"name": "randomWWITab",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "wwiStandard",
