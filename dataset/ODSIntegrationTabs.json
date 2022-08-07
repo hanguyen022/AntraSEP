@@ -1,5 +1,5 @@
 {
-	"name": "IntegrationTabs",
+	"name": "ODSIntegrationTabs",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "PurchaseODS",
