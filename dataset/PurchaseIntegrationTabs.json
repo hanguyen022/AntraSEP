@@ -1,0 +1,24 @@
+{
+	"name": "PurchaseIntegrationTabs",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PurchaseIntegration",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"table": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "Integration",
+			"table": {
+				"value": "@dataset().table",
+				"type": "Expression"
+			}
+		}
+	}
+}
