@@ -1,5 +1,5 @@
 {
-	"name": "PurchaseIntegrationTabs",
+	"name": "IntegrationDTBTabs",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "PurchaseIntegration",
