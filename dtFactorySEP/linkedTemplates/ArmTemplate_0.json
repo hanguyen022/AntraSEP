@@ -212,24 +212,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/IntegrationSup')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "PurchaseIntegration",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/PurchaseIntegration')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/IntegrationTrans')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1231,6 +1213,66 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/randomWWITab')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "wwiStandard",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "CityID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CityName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "StateProvinceID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Location",
+						"type": "geography"
+					},
+					{
+						"name": "LatestRecordedPopulation",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "LastEditedBy",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ValidFrom",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "ValidTo",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "Application",
+					"table": "Cities"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/wwiStandard')]"
 			]
 		}
 	]

@@ -33,7 +33,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/GitCreateETL')]",
+			"name": "[concat(parameters('factoryName'), '/FullLoadGitETL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -295,11 +295,102 @@
 								"parameters": {}
 							}
 						}
+					},
+					{
+						"name": "CopyToPurchaseIntegration",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "CreateIntegration",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@variables('integrationTabList')",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "CopyIntegratonTabsToNewDTB",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false,
+											"tableOption": "autoCreate",
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ODSIntegrationTabs",
+											"type": "DatasetReference",
+											"parameters": {
+												"table": {
+													"value": "@item()",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "IntegrationDTBTabs",
+											"type": "DatasetReference",
+											"parameters": {
+												"table": {
+													"value": "@item()",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
+				},
+				"variables": {
+					"integrationTabList": {
+						"type": "Array",
+						"defaultValue": [
+							"Suppliers",
+							"Purchase",
+							"Transactions"
+						]
+					}
 				},
 				"annotations": []
 			},
@@ -309,6 +400,8 @@
 				"[concat(variables('factoryId'), '/datasets/RandomODSTab')]",
 				"[concat(variables('factoryId'), '/datasets/PurchaseTabs')]",
 				"[concat(variables('factoryId'), '/datasets/CopyToODSOutput')]",
+				"[concat(variables('factoryId'), '/datasets/ODSIntegrationTabs')]",
+				"[concat(variables('factoryId'), '/datasets/IntegrationDTBTabs')]",
 				"[concat(variables('factoryId'), '/linkedServices/incompatibleDataWhileCopy')]"
 			]
 		},
@@ -421,24 +514,6 @@
 					"schema": "Integration",
 					"table": "Purchase"
 				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/PurchaseIntegration')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/IntegrationSup')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "PurchaseIntegration",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/PurchaseIntegration')]"
@@ -1862,7 +1937,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/wwiDW')]",
+			"name": "[concat(parameters('factoryName'), '/wwiDWPara')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -2945,6 +3020,67 @@
 				"[concat(variables('factoryId'), '/datasets/surSupplier')]",
 				"[concat(variables('factoryId'), '/datasets/surPOLines')]",
 				"[concat(variables('factoryId'), '/datasets/surTransactions')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ODSIntegrationTabs')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseODS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "Integration",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IntegrationDTBTabs')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseIntegration",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "Integration",
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseIntegration')]"
 			]
 		}
 	]
