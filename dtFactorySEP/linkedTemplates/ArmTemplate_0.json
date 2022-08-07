@@ -11,9 +11,17 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'PurchaseDW'"
 		},
+		"PurchaseIntegration_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'PurchaseIntegration'"
+		},
 		"PurchaseODS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'PurchaseODS'"
+		},
+		"incompatibleDataWhileCopy_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'incompatibleDataWhileCopy'"
 		},
 		"wwiStandard_connectionString": {
 			"type": "secureString",
@@ -38,6 +46,19 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PurchaseIntegration')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('PurchaseIntegration_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PurchaseODS')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -46,6 +67,19 @@
 				"type": "AzureSqlDatabase",
 				"typeProperties": {
 					"connectionString": "[parameters('PurchaseODS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/incompatibleDataWhileCopy')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('incompatibleDataWhileCopy_connectionString')]"
 				}
 			},
 			"dependsOn": []
@@ -64,12 +98,659 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/OnlyDimFactTabs')]",
+			"name": "[concat(parameters('factoryName'), '/CopyToODSOutput')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "PurchaseODS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IngtegrationPurchase')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseIntegration",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "PurchaseSKey",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "SupplierSKey",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "OrderDate",
+						"type": "date"
+					},
+					{
+						"name": "PurchaseOrderID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "OrderedOuters",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ReceivedOuters",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PackageTypeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "IsOrderFinalized",
+						"type": "bit"
+					},
+					{
+						"name": "SupplierID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "StockItemID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "LastEditedWhen",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "Integration",
+					"table": "Purchase"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseIntegration')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IntegrationSup')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseIntegration",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseIntegration')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IntegrationTrans')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseIntegration",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "TransSKey",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "TransactionDate",
+						"type": "date"
+					},
+					{
+						"name": "SupplierSKey",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "SupplierTransactionID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PurchaseOrderID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SupplierInvoiceNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "AmountExcludingTax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "TaxAmount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "TransactionAmount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "OutstandingBalance",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "IsFinalized",
+						"type": "bit"
+					},
+					{
+						"name": "SupplierID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TransactionTypeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PaymentMethodID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "LastEditedWhen",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "Integration",
+					"table": "Transactions"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseIntegration')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PurchaseTabs')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "wwiStandard",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/wwiStandard')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RandomDWTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseDW",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "City Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WWI City ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "City",
+						"type": "nvarchar"
+					},
+					{
+						"name": "State Province",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Country",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Continent",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Sales Territory",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Region",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Subregion",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Location",
+						"type": "geography"
+					},
+					{
+						"name": "Latest Recorded Population",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Valid From",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "Valid To",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "Lineage Key",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Dimension",
+					"table": "City"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseDW')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/addSurrogate_Sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseODS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dimSuppliers')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseDW",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Supplier Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WWI Supplier ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Supplier",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Category",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Primary Contact",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Supplier Reference",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Payment Days",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Postal Code",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Valid From",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "Valid To",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "Lineage Key",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Dimension",
+					"table": "Supplier"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseDW')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/factPurchase')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseDW",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Purchase Key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Date Key",
+						"type": "date"
+					},
+					{
+						"name": "Supplier Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Stock Item Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WWI Purchase Order ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Ordered Outers",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Ordered Quantity",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Received Outers",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Package",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Is Order Finalized",
+						"type": "bit"
+					},
+					{
+						"name": "Lineage Key",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Fact",
+					"table": "Purchase"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseDW')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/factTransactions')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseDW",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Transaction Key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Date Key",
+						"type": "date"
+					},
+					{
+						"name": "Customer Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Bill To Customer Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Supplier Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Transaction Type Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Payment Method Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WWI Customer Transaction ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WWI Supplier Transaction ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WWI Invoice ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WWI Purchase Order ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Supplier Invoice Number",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Total Excluding Tax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Tax Amount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Total Including Tax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Outstanding Balance",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Is Finalized",
+						"type": "bit"
+					},
+					{
+						"name": "Lineage Key",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Fact",
+					"table": "Transaction"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseDW')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationSupplier')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseIntegration",
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
@@ -120,159 +801,23 @@
 						"name": "ValidTo",
 						"type": "datetime2",
 						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
 					}
 				],
 				"typeProperties": {
-					"schema": "Dimension",
+					"schema": "Integration",
 					"table": "Suppliers"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseIntegration')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/OnlyPurchaseTables')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "wwiStandard",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"schema": {
-						"type": "string"
-					},
-					"table": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().schema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().table",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/wwiStandard')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PurchaseDW')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "PurchaseDW",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"schema": {
-						"type": "string"
-					},
-					"table": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().schema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().table",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/PurchaseDW')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PurchaseODS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "PurchaseODS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"schema": {
-						"type": "string"
-					},
-					"table": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().schema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().table",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PurchaseSurrogateOutput')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "PurchaseODS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"schema": {
-						"type": "string"
-					},
-					"table": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().schema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().table",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/RandomODSTable')]",
+			"name": "[concat(parameters('factoryName'), '/RandomODSTab')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -335,11 +880,15 @@
 						"name": "LastEditedWhen",
 						"type": "datetime2",
 						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
 					}
 				],
 				"typeProperties": {
-					"schema": "Integration",
-					"table": "Purchase"
+					"schema": "Purchasing",
+					"table": "PurchaseOrderLines"
 				}
 			},
 			"dependsOn": [
@@ -347,7 +896,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/RandomPurchasing4Join')]",
+			"name": "[concat(parameters('factoryName'), '/odsPOLines')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -357,322 +906,331 @@
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
+				"schema": [
+					{
+						"name": "PurchaseOrderLineID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PurchaseOrderID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "StockItemID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "OrderedOuters",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Description",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ReceivedOuters",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PackageTypeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ExpectedUnitPricePerOuter",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "LastReceiptDate",
+						"type": "date"
+					},
+					{
+						"name": "IsOrderLineFinalized",
+						"type": "bit"
+					},
+					{
+						"name": "LastEditedBy",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "LastEditedWhen",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "Purchasing",
+					"table": "PurchaseOrderLines"
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/RandomWWIStandard')]",
+			"name": "[concat(parameters('factoryName'), '/odsSupplier')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "wwiStandard",
+					"referenceName": "PurchaseODS",
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "Application",
-					"table": "Cities"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/wwiStandard')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/addSurrogate')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "PurchaseODS",
-								"type": "DatasetReference"
-							},
-							"name": "CopyPurchaseOutput"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "PurchaseSurrogateOutput",
-								"type": "DatasetReference"
-							},
-							"name": "SurrogateAdded"
-						}
-					],
-					"transformations": [
-						{
-							"name": "surrogateKey1"
-						}
-					],
-					"scriptLines": [
-						"source(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> CopyPurchaseOutput",
-						"CopyPurchaseOutput keyGenerate(output(SurKey as long),",
-						"     startAt: 1L,",
-						"     stepValue: 1L) ~> surrogateKey1",
-						"surrogateKey1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> SurrogateAdded"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/PurchaseODS')]",
-				"[concat(variables('factoryId'), '/datasets/PurchaseSurrogateOutput')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/GitCreateETL')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
+				"schema": [
 					{
-						"name": "LookupPurchaseTables",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "SELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing'\n",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "RandomWWIStandard",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
+						"name": "SupplierID",
+						"type": "int",
+						"precision": 10
 					},
 					{
-						"name": "CopyToPurchaseODS",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "LookupPurchaseTables",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('LookupPurchaseTables').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "CopyToODS",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"additionalColumns": [
-												{
-													"name": "IngestTime",
-													"value": {
-														"value": "@convertTimeZone(utcNow(),'UTC','Eastern Standard Time')",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false,
-											"tableOption": "autoCreate",
-											"disableMetricsCollection": false
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "OnlyPurchaseTables",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": {
-													"value": "@item().table_schema",
-													"type": "Expression"
-												},
-												"table": {
-													"value": "@item().table_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "PurchaseODS",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": {
-													"value": "@item().table_schema",
-													"type": "Expression"
-												},
-												"table": {
-													"value": "@item().table_name",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "AddSurrogate",
-									"type": "ExecuteDataFlow",
-									"dependsOn": [
-										{
-											"activity": "CopyToODS",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "1.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataflow": {
-											"referenceName": "addSurrogate",
-											"type": "DataFlowReference",
-											"parameters": {},
-											"datasetParameters": {
-												"CopyPurchaseOutput": {
-													"schema": {
-														"value": "@item().table_schema",
-														"type": "Expression"
-													},
-													"table": {
-														"value": "@item().table_name",
-														"type": "Expression"
-													}
-												},
-												"SurrogateAdded": {
-													"schema": {
-														"value": "@item().table_schema",
-														"type": "Expression"
-													},
-													"table": {
-														"value": "@concat('Surrogate_',item().table_name)",
-														"type": "Expression"
-													}
-												}
-											}
-										},
-										"staging": {},
-										"compute": {
-											"coreCount": 8,
-											"computeType": "General"
-										},
-										"traceLevel": "Fine"
-									}
-								}
-							]
-						}
+						"name": "SupplierName",
+						"type": "nvarchar"
 					},
 					{
-						"name": "CreateIntegration",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "CopyToPurchaseODS",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "DECLARE @sql0 NVARCHAR(max)=''\nSELECT @sql0 += ' Drop table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  table_schema = 'Integration'\nExec Sp_executesql @sql0\n\nDECLARE @sql nvarchar(max)\nDECLARE @sql2 nvarchar(max)\nSET @sql ='DROP SCHEMA IF EXISTS Integration'\nSET @sql2 = 'CREATE SCHEMA Integration'\nEXEC sp_executesql @sql\nEXEC sp_executesql @sql2\n\nSELECT s.SurKey as SupplierSKey\n\t, s.SupplierID\n\t, s.[SupplierName]\n\t, c.[SupplierCategoryName]\n\t, s.[PrimaryContactPersonID]\n\t, s.[SupplierReference]\n\t, s.[PaymentDays]\n\t, s.[PostalPostalCode]\n\t, s.[ValidFrom]\n\t, s.[ValidTo]\n\t, s.[IngestTime]\nINTO Integration.Suppliers\nFROM [Purchasing].[Surrogate_Suppliers] s\nLEFT JOIN Purchasing.Surrogate_SupplierCategories c \n\tON s.[SupplierCategoryID] = c.[SupplierCategoryID]\n\n\nSELECT ol.SurKey as PurchaseSKey\n\t, s.SurKey as SupplierSKey\n\t, o.[OrderDate]\n\t, o.[PurchaseOrderID]\n\t, ol.[OrderedOuters]\n\t, ol.[ReceivedOuters]\n\t, ol.[PackageTypeID]\n\t, o.[IsOrderFinalized]\n\t, o.[SupplierID]\n\t, ol.[StockItemID]\n\t, o.[LastEditedWhen]\n\t, ol.IngestTime\nINTO Integration.Purchase\nFROM [Purchasing].[Surrogate_PurchaseOrderLines] ol\nLEFT JOIN Purchasing.Surrogate_PurchaseOrders o\n\tON ol.[PurchaseOrderID] = o.[PurchaseOrderID]\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON o.SupplierID = s.SupplierID\n\n\nSELECT t.SurKey as TransSKey\n\t, t.[TransactionDate]\n\t, s.SurKey as SupplierSKey\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\n\t, t.[SupplierID]\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[LastEditedWhen]\n\t, t.IngestTime\nINTO Integration.Transactions\nFROM [Purchasing].[Surrogate_SupplierTransactions] t\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON t.SupplierID = s.SupplierID\n\nSELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema = 'Integration'",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "RandomPurchasing4Join",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
+						"name": "SupplierCategoryID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PrimaryContactPersonID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "AlternateContactPersonID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DeliveryMethodID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DeliveryCityID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PostalCityID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SupplierReference",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccountName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccountBranch",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccountCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccountNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankInternationalCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PaymentDays",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "InternalComments",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PhoneNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FaxNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "WebsiteURL",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeliveryAddressLine1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeliveryAddressLine2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeliveryPostalCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeliveryLocation",
+						"type": "geography"
+					},
+					{
+						"name": "PostalAddressLine1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PostalAddressLine2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PostalPostalCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LastEditedBy",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ValidFrom",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "ValidTo",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
 					}
 				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": []
+				"typeProperties": {
+					"schema": "Purchasing",
+					"table": "Suppliers"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/RandomWWIStandard')]",
-				"[concat(variables('factoryId'), '/datasets/RandomPurchasing4Join')]",
-				"[concat(variables('factoryId'), '/datasets/OnlyPurchaseTables')]",
-				"[concat(variables('factoryId'), '/datasets/PurchaseODS')]",
-				"[concat(variables('factoryId'), '/dataflows/addSurrogate')]"
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/odsTransaction')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseODS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "SupplierTransactionID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SupplierID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TransactionTypeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PurchaseOrderID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PaymentMethodID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SupplierInvoiceNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TransactionDate",
+						"type": "date"
+					},
+					{
+						"name": "AmountExcludingTax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "TaxAmount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "TransactionAmount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "OutstandingBalance",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "FinalizationDate",
+						"type": "date"
+					},
+					{
+						"name": "IsFinalized",
+						"type": "bit"
+					},
+					{
+						"name": "LastEditedBy",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "LastEditedWhen",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "Purchasing",
+					"table": "SupplierTransactions"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PurchaseODS')]"
 			]
 		}
 	]

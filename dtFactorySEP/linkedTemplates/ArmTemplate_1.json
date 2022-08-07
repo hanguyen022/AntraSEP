@@ -13,222 +13,1426 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/randomWWITab')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
-					{
-						"name": "LookupPurchaseTables",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "SELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing'\n",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "RandomWWIStandard",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "CopyToPurchaseODS",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "LookupPurchaseTables",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('LookupPurchaseTables').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "CopyToODS",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false,
-											"tableOption": "autoCreate",
-											"disableMetricsCollection": false
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "RandomWWIStandard",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "PurchaseODS",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": {
-													"value": "@item().table_schema",
-													"type": "Expression"
-												},
-												"table": {
-													"value": "@item().table_name",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "Data flow1",
-									"type": "ExecuteDataFlow",
-									"dependsOn": [
-										{
-											"activity": "CopyToODS",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "1.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataflow": {
-											"referenceName": "addSurrogate",
-											"type": "DataFlowReference",
-											"parameters": {},
-											"datasetParameters": {
-												"CopyPurchaseOutput": {
-													"schema": {
-														"value": "@item().table_schema",
-														"type": "Expression"
-													},
-													"table": {
-														"value": "@item().table_name",
-														"type": "Expression"
-													}
-												},
-												"SurrogateAdded": {
-													"schema": {
-														"value": "@item().table_schema",
-														"type": "Expression"
-													},
-													"table": {
-														"value": "@concat('Surrogate_',item())",
-														"type": "Expression"
-													}
-												}
-											}
-										},
-										"staging": {},
-										"compute": {
-											"coreCount": 8,
-											"computeType": "General"
-										},
-										"traceLevel": "Fine"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
+				"linkedServiceName": {
+					"referenceName": "wwiStandard",
+					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
-				"lastPublishTime": "2022-08-01T20:42:00Z"
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "CityID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CityName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "StateProvinceID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Location",
+						"type": "geography"
+					},
+					{
+						"name": "LatestRecordedPopulation",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "LastEditedBy",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ValidFrom",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "ValidTo",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "Application",
+					"table": "Cities"
+				}
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/GitPipline')]",
+			"name": "[concat(parameters('factoryName'), '/surPOLines')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseODS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "PurchaseOrderLineID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PurchaseOrderID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "StockItemID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "OrderedOuters",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Description",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ReceivedOuters",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PackageTypeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ExpectedUnitPricePerOuter",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "LastReceiptDate",
+						"type": "date"
+					},
+					{
+						"name": "IsOrderLineFinalized",
+						"type": "bit"
+					},
+					{
+						"name": "LastEditedBy",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "LastEditedWhen",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SurKey",
+						"type": "bigint",
+						"precision": 19
+					}
+				],
+				"typeProperties": {
+					"schema": "Purchasing",
+					"table": "Surrogate_PurchaseOrderLines"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/surSupplier')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseODS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "SupplierID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SupplierName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SupplierCategoryID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PrimaryContactPersonID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "AlternateContactPersonID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DeliveryMethodID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DeliveryCityID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PostalCityID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SupplierReference",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccountName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccountBranch",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccountCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankAccountNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "BankInternationalCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PaymentDays",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "InternalComments",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PhoneNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FaxNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "WebsiteURL",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeliveryAddressLine1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeliveryAddressLine2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeliveryPostalCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DeliveryLocation",
+						"type": "varbinary"
+					},
+					{
+						"name": "PostalAddressLine1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PostalAddressLine2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PostalPostalCode",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LastEditedBy",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ValidFrom",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "ValidTo",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SurKey",
+						"type": "bigint",
+						"precision": 19
+					}
+				],
+				"typeProperties": {
+					"schema": "Purchasing",
+					"table": "Surrogate_Suppliers"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/surTransactions')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseODS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "SupplierTransactionID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SupplierID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TransactionTypeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PurchaseOrderID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PaymentMethodID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SupplierInvoiceNumber",
+						"type": "nvarchar"
+					},
+					{
+						"name": "TransactionDate",
+						"type": "date"
+					},
+					{
+						"name": "AmountExcludingTax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "TaxAmount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "TransactionAmount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "OutstandingBalance",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "FinalizationDate",
+						"type": "date"
+					},
+					{
+						"name": "IsFinalized",
+						"type": "bit"
+					},
+					{
+						"name": "LastEditedBy",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "LastEditedWhen",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "IngestTime",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SurKey",
+						"type": "bigint",
+						"precision": 19
+					}
+				],
+				"typeProperties": {
+					"schema": "Purchasing",
+					"table": "Surrogate_SupplierTransactions"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/wwiDW')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PurchaseDW",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/addSurrogate')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "CopyToODSOutput",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "addSurrogate_Sink",
+								"type": "DatasetReference"
+							},
+							"name": "SurrogatedTables"
+						}
+					],
+					"transformations": [
+						{
+							"name": "surrogateKey1"
+						}
+					],
+					"scriptLines": [
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> source1",
+						"source1 keyGenerate(output(SurKey as long),",
+						"     startAt: 1L,",
+						"     stepValue: 1L) ~> surrogateKey1",
+						"surrogateKey1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> SurrogatedTables"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/updateSurrogate')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dimSuppliers",
+								"type": "DatasetReference"
+							},
+							"name": "DimSup"
+						},
+						{
+							"dataset": {
+								"referenceName": "surSupplier",
+								"type": "DatasetReference"
+							},
+							"name": "surSupplier"
+						},
+						{
+							"dataset": {
+								"referenceName": "surPOLines",
+								"type": "DatasetReference"
+							},
+							"name": "surPurchase"
+						},
+						{
+							"dataset": {
+								"referenceName": "factPurchase",
+								"type": "DatasetReference"
+							},
+							"name": "factPurchase"
+						},
+						{
+							"dataset": {
+								"referenceName": "surTransactions",
+								"type": "DatasetReference"
+							},
+							"name": "surTransactions"
+						},
+						{
+							"dataset": {
+								"referenceName": "factTransactions",
+								"type": "DatasetReference"
+							},
+							"name": "factTran"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "integrationSupplier",
+								"type": "DatasetReference"
+							},
+							"name": "updatedSurSup"
+						},
+						{
+							"dataset": {
+								"referenceName": "IngtegrationPurchase",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						},
+						{
+							"dataset": {
+								"referenceName": "IntegrationTrans",
+								"type": "DatasetReference"
+							},
+							"name": "sink3"
+						}
+					],
+					"transformations": [
+						{
+							"name": "joinMaxVal"
+						},
+						{
+							"name": "UpdateSurrogateKey"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "UpdateSurrogate"
+						},
+						{
+							"name": "delMaxVal"
+						},
+						{
+							"name": "join2"
+						},
+						{
+							"name": "updateSurrogateK"
+						},
+						{
+							"name": "select2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          maxVal as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'Select max([Supplier Key]) as maxVal\\nFROM [Dimension].[Supplier]',",
+						"     format: 'query') ~> DimSup",
+						"source(output(",
+						"          SupplierID as integer,",
+						"          SupplierName as string,",
+						"          SupplierCategoryID as integer,",
+						"          PrimaryContactPersonID as integer,",
+						"          AlternateContactPersonID as integer,",
+						"          DeliveryMethodID as integer,",
+						"          DeliveryCityID as integer,",
+						"          PostalCityID as integer,",
+						"          SupplierReference as string,",
+						"          BankAccountName as string,",
+						"          BankAccountBranch as string,",
+						"          BankAccountCode as string,",
+						"          BankAccountNumber as string,",
+						"          BankInternationalCode as string,",
+						"          PaymentDays as integer,",
+						"          InternalComments as string,",
+						"          PhoneNumber as string,",
+						"          FaxNumber as string,",
+						"          WebsiteURL as string,",
+						"          DeliveryAddressLine1 as string,",
+						"          DeliveryAddressLine2 as string,",
+						"          DeliveryPostalCode as string,",
+						"          DeliveryLocation as binary,",
+						"          PostalAddressLine1 as string,",
+						"          PostalAddressLine2 as string,",
+						"          PostalPostalCode as string,",
+						"          LastEditedBy as integer,",
+						"          ValidFrom as timestamp,",
+						"          ValidTo as timestamp,",
+						"          IngestTime as string,",
+						"          SurKey as long",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'select * \\nfrom purchasing.surrogate_suppliers',",
+						"     format: 'query') ~> surSupplier",
+						"source(output(",
+						"          SurKey as long,",
+						"          PurchaseOrderLineID as integer,",
+						"          PurchaseOrderID as integer,",
+						"          StockItemID as integer,",
+						"          OrderedOuters as integer,",
+						"          Description as string,",
+						"          ReceivedOuters as integer,",
+						"          PackageTypeID as integer,",
+						"          ExpectedUnitPricePerOuter as decimal(18,2),",
+						"          LastReceiptDate as date,",
+						"          IsOrderLineFinalized as boolean,",
+						"          LastEditedBy as integer,",
+						"          LastEditedWhen as timestamp,",
+						"          IngestTime as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'Select *\\nFrom Purchasing.Surrogate_PurchaseOrderLines',",
+						"     format: 'query') ~> surPurchase",
+						"source(output(",
+						"          maxVal as long",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'select max([Purchase Key]) as maxVal\\nFrom [Fact].[Purchase]',",
+						"     format: 'query') ~> factPurchase",
+						"source(output(",
+						"          SupplierTransactionID as integer,",
+						"          SupplierID as integer,",
+						"          TransactionTypeID as integer,",
+						"          PurchaseOrderID as integer,",
+						"          PaymentMethodID as integer,",
+						"          SupplierInvoiceNumber as string,",
+						"          TransactionDate as date,",
+						"          AmountExcludingTax as decimal(18,2),",
+						"          TaxAmount as decimal(18,2),",
+						"          TransactionAmount as decimal(18,2),",
+						"          OutstandingBalance as decimal(18,2),",
+						"          FinalizationDate as date,",
+						"          IsFinalized as boolean,",
+						"          LastEditedBy as integer,",
+						"          LastEditedWhen as timestamp,",
+						"          IngestTime as string,",
+						"          SurKey as long",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> surTransactions",
+						"source(output(",
+						"          MaxVal as long",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'select max([Transaction Key]) as MaxVal\\nfrom [Fact].[Transaction]',",
+						"     format: 'query') ~> factTran",
+						"surSupplier, DimSup join(1==1,",
+						"     joinType:'cross',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinMaxVal",
+						"joinMaxVal derive(SurKey = SurKey + maxVal) ~> UpdateSurrogateKey",
+						"UpdateSurrogateKey select(mapColumn(",
+						"          SupplierID,",
+						"          SupplierName,",
+						"          SupplierCategoryID,",
+						"          PrimaryContactPersonID,",
+						"          AlternateContactPersonID,",
+						"          DeliveryMethodID,",
+						"          DeliveryCityID,",
+						"          PostalCityID,",
+						"          SupplierReference,",
+						"          BankAccountName,",
+						"          BankAccountBranch,",
+						"          BankAccountCode,",
+						"          BankAccountNumber,",
+						"          BankInternationalCode,",
+						"          SurKey,",
+						"          PaymentDays,",
+						"          InternalComments,",
+						"          PhoneNumber,",
+						"          FaxNumber,",
+						"          WebsiteURL,",
+						"          DeliveryAddressLine1,",
+						"          DeliveryAddressLine2,",
+						"          DeliveryPostalCode,",
+						"          DeliveryLocation,",
+						"          PostalAddressLine1,",
+						"          PostalAddressLine2,",
+						"          PostalPostalCode,",
+						"          LastEditedBy,",
+						"          ValidFrom,",
+						"          ValidTo,",
+						"          IngestTime,",
+						"          maxVal",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"surPurchase, factPurchase join(1==1,",
+						"     joinType:'cross',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"join1 derive(SurKey = maxVal+SurKey) ~> UpdateSurrogate",
+						"UpdateSurrogate select(mapColumn(",
+						"          SurKey,",
+						"          PurchaseOrderLineID,",
+						"          PurchaseOrderID,",
+						"          StockItemID,",
+						"          OrderedOuters,",
+						"          Description,",
+						"          ReceivedOuters,",
+						"          PackageTypeID,",
+						"          ExpectedUnitPricePerOuter,",
+						"          LastReceiptDate,",
+						"          IsOrderLineFinalized,",
+						"          LastEditedBy,",
+						"          LastEditedWhen,",
+						"          IngestTime,",
+						"          maxVal",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> delMaxVal",
+						"surTransactions, factTran join(1==1,",
+						"     joinType:'cross',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join2",
+						"join2 derive(SurKey = SurKey + MaxVal) ~> updateSurrogateK",
+						"updateSurrogateK select(mapColumn(",
+						"          SurKey,",
+						"          SupplierTransactionID,",
+						"          SupplierID,",
+						"          TransactionTypeID,",
+						"          PurchaseOrderID,",
+						"          PaymentMethodID,",
+						"          SupplierInvoiceNumber,",
+						"          TransactionDate,",
+						"          AmountExcludingTax,",
+						"          TaxAmount,",
+						"          TransactionAmount,",
+						"          OutstandingBalance,",
+						"          FinalizationDate,",
+						"          IsFinalized,",
+						"          LastEditedBy,",
+						"          LastEditedWhen,",
+						"          IngestTime,",
+						"          MaxVal",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"select1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          SupplierSKey as long,",
+						"          SupplierID as integer,",
+						"          SupplierName as string,",
+						"          SupplierCategoryName as string,",
+						"          PrimaryContactPersonID as integer,",
+						"          SupplierReference as string,",
+						"          PaymentDays as integer,",
+						"          PostalPostalCode as string,",
+						"          ValidFrom as timestamp,",
+						"          ValidTo as timestamp,",
+						"          IngestTime as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     recreate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          SurKey,",
+						"          SupplierID,",
+						"          SupplierName,",
+						"          SupplierCategoryID,",
+						"          PrimaryContactPersonID,",
+						"          AlternateContactPersonID,",
+						"          DeliveryMethodID,",
+						"          DeliveryCityID,",
+						"          PostalCityID,",
+						"          SupplierReference,",
+						"          BankAccountName,",
+						"          BankAccountBranch,",
+						"          BankAccountCode,",
+						"          BankAccountNumber,",
+						"          BankInternationalCode,",
+						"          PaymentDays,",
+						"          InternalComments,",
+						"          PhoneNumber,",
+						"          FaxNumber,",
+						"          WebsiteURL,",
+						"          DeliveryAddressLine1,",
+						"          DeliveryAddressLine2,",
+						"          DeliveryPostalCode,",
+						"          PostalAddressLine1,",
+						"          PostalAddressLine2,",
+						"          PostalPostalCode,",
+						"          LastEditedBy,",
+						"          ValidFrom,",
+						"          ValidTo,",
+						"          IngestTime",
+						"     )) ~> updatedSurSup",
+						"delMaxVal sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          PurchaseSKey as long,",
+						"          SupplierSKey as long,",
+						"          OrderDate as date,",
+						"          PurchaseOrderID as integer,",
+						"          OrderedOuters as integer,",
+						"          ReceivedOuters as integer,",
+						"          PackageTypeID as integer,",
+						"          IsOrderFinalized as boolean,",
+						"          SupplierID as integer,",
+						"          StockItemID as integer,",
+						"          LastEditedWhen as timestamp,",
+						"          IngestTime as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     recreate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sink2",
+						"select2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          TransSKey as long,",
+						"          TransactionDate as date,",
+						"          SupplierSKey as long,",
+						"          SupplierTransactionID as integer,",
+						"          PurchaseOrderID as integer,",
+						"          SupplierInvoiceNumber as string,",
+						"          AmountExcludingTax as decimal(18,2),",
+						"          TaxAmount as decimal(18,2),",
+						"          TransactionAmount as decimal(18,2),",
+						"          OutstandingBalance as decimal(18,2),",
+						"          IsFinalized as boolean,",
+						"          SupplierID as integer,",
+						"          TransactionTypeID as integer,",
+						"          PaymentMethodID as integer,",
+						"          LastEditedWhen as timestamp,",
+						"          IngestTime as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     recreate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sink3"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/surSupplier')]",
+				"[concat(variables('factoryId'), '/datasets/surPOLines')]",
+				"[concat(variables('factoryId'), '/datasets/surTransactions')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/oneTimeSurrogate')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dimSuppliers",
+								"type": "DatasetReference"
+							},
+							"name": "DimSup"
+						},
+						{
+							"dataset": {
+								"referenceName": "odsSupplier",
+								"type": "DatasetReference"
+							},
+							"name": "surSupplier"
+						},
+						{
+							"dataset": {
+								"referenceName": "odsPOLines",
+								"type": "DatasetReference"
+							},
+							"name": "surPurchase"
+						},
+						{
+							"dataset": {
+								"referenceName": "factPurchase",
+								"type": "DatasetReference"
+							},
+							"name": "factPurchase"
+						},
+						{
+							"dataset": {
+								"referenceName": "odsTransaction",
+								"type": "DatasetReference"
+							},
+							"name": "surTransactions"
+						},
+						{
+							"dataset": {
+								"referenceName": "factTransactions",
+								"type": "DatasetReference"
+							},
+							"name": "factTran"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "surSupplier",
+								"type": "DatasetReference"
+							},
+							"name": "updatedSurSup"
+						},
+						{
+							"dataset": {
+								"referenceName": "surPOLines",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						},
+						{
+							"dataset": {
+								"referenceName": "surTransactions",
+								"type": "DatasetReference"
+							},
+							"name": "sink3"
+						}
+					],
+					"transformations": [
+						{
+							"name": "joinMaxVal"
+						},
+						{
+							"name": "UpdateSurrogateKey"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "UpdateSurrogate"
+						},
+						{
+							"name": "delMaxVal"
+						},
+						{
+							"name": "join2"
+						},
+						{
+							"name": "updateSurrogateK"
+						},
+						{
+							"name": "select2"
+						},
+						{
+							"name": "surrogateKey2"
+						},
+						{
+							"name": "surrogateKey1"
+						},
+						{
+							"name": "surrogateKey3"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          maxVal as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'Select max([Supplier Key]) as maxVal\\nFROM [Dimension].[Supplier]',",
+						"     format: 'query') ~> DimSup",
+						"source(output(",
+						"          SupplierID as integer,",
+						"          SupplierName as string,",
+						"          SupplierCategoryID as integer,",
+						"          PrimaryContactPersonID as integer,",
+						"          AlternateContactPersonID as integer,",
+						"          DeliveryMethodID as integer,",
+						"          DeliveryCityID as integer,",
+						"          PostalCityID as integer,",
+						"          SupplierReference as string,",
+						"          BankAccountName as string,",
+						"          BankAccountBranch as string,",
+						"          BankAccountCode as string,",
+						"          BankAccountNumber as string,",
+						"          BankInternationalCode as string,",
+						"          PaymentDays as integer,",
+						"          InternalComments as string,",
+						"          PhoneNumber as string,",
+						"          FaxNumber as string,",
+						"          WebsiteURL as string,",
+						"          DeliveryAddressLine1 as string,",
+						"          DeliveryAddressLine2 as string,",
+						"          DeliveryPostalCode as string,",
+						"          DeliveryLocation as binary,",
+						"          PostalAddressLine1 as string,",
+						"          PostalAddressLine2 as string,",
+						"          PostalPostalCode as string,",
+						"          LastEditedBy as integer,",
+						"          ValidFrom as timestamp,",
+						"          ValidTo as timestamp,",
+						"          IngestTime as string,",
+						"          SurKey as long",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> surSupplier",
+						"source(output(",
+						"          SurKey as long,",
+						"          PurchaseOrderLineID as integer,",
+						"          PurchaseOrderID as integer,",
+						"          StockItemID as integer,",
+						"          OrderedOuters as integer,",
+						"          Description as string,",
+						"          ReceivedOuters as integer,",
+						"          PackageTypeID as integer,",
+						"          ExpectedUnitPricePerOuter as decimal(18,2),",
+						"          LastReceiptDate as date,",
+						"          IsOrderLineFinalized as boolean,",
+						"          LastEditedBy as integer,",
+						"          LastEditedWhen as timestamp,",
+						"          IngestTime as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> surPurchase",
+						"source(output(",
+						"          maxVal as long",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'select max([Purchase Key]) as maxVal\\nFrom [Fact].[Purchase]',",
+						"     format: 'query') ~> factPurchase",
+						"source(output(",
+						"          SupplierTransactionID as integer,",
+						"          SupplierID as integer,",
+						"          TransactionTypeID as integer,",
+						"          PurchaseOrderID as integer,",
+						"          PaymentMethodID as integer,",
+						"          SupplierInvoiceNumber as string,",
+						"          TransactionDate as date,",
+						"          AmountExcludingTax as decimal(18,2),",
+						"          TaxAmount as decimal(18,2),",
+						"          TransactionAmount as decimal(18,2),",
+						"          OutstandingBalance as decimal(18,2),",
+						"          FinalizationDate as date,",
+						"          IsFinalized as boolean,",
+						"          LastEditedBy as integer,",
+						"          LastEditedWhen as timestamp,",
+						"          IngestTime as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> surTransactions",
+						"source(output(",
+						"          MaxVal as long",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'select max([Transaction Key]) as MaxVal\\nfrom [Fact].[Transaction]',",
+						"     format: 'query') ~> factTran",
+						"surrogateKey1, DimSup join(1==1,",
+						"     joinType:'cross',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinMaxVal",
+						"joinMaxVal derive(SurKey = SurKey + maxVal) ~> UpdateSurrogateKey",
+						"UpdateSurrogateKey select(mapColumn(",
+						"          SupplierID,",
+						"          SupplierName,",
+						"          SupplierCategoryID,",
+						"          PrimaryContactPersonID,",
+						"          AlternateContactPersonID,",
+						"          DeliveryMethodID,",
+						"          DeliveryCityID,",
+						"          PostalCityID,",
+						"          SupplierReference,",
+						"          BankAccountName,",
+						"          BankAccountBranch,",
+						"          BankAccountCode,",
+						"          BankAccountNumber,",
+						"          BankInternationalCode,",
+						"          SurKey,",
+						"          PaymentDays,",
+						"          InternalComments,",
+						"          PhoneNumber,",
+						"          FaxNumber,",
+						"          WebsiteURL,",
+						"          DeliveryAddressLine1,",
+						"          DeliveryAddressLine2,",
+						"          DeliveryPostalCode,",
+						"          DeliveryLocation,",
+						"          PostalAddressLine1,",
+						"          PostalAddressLine2,",
+						"          PostalPostalCode,",
+						"          LastEditedBy,",
+						"          ValidFrom,",
+						"          ValidTo,",
+						"          IngestTime",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"surrogateKey2, factPurchase join(1==1,",
+						"     joinType:'cross',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"join1 derive(SurKey = maxVal+SurKey) ~> UpdateSurrogate",
+						"UpdateSurrogate select(mapColumn(",
+						"          SurKey,",
+						"          PurchaseOrderLineID,",
+						"          PurchaseOrderID,",
+						"          StockItemID,",
+						"          OrderedOuters,",
+						"          Description,",
+						"          ReceivedOuters,",
+						"          PackageTypeID,",
+						"          ExpectedUnitPricePerOuter,",
+						"          LastReceiptDate,",
+						"          IsOrderLineFinalized,",
+						"          LastEditedBy,",
+						"          LastEditedWhen,",
+						"          IngestTime",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> delMaxVal",
+						"surrogateKey3, factTran join(1==1,",
+						"     joinType:'cross',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join2",
+						"join2 derive(SurKey = SurKey + MaxVal) ~> updateSurrogateK",
+						"updateSurrogateK select(mapColumn(",
+						"          SurKey,",
+						"          SupplierTransactionID,",
+						"          SupplierID,",
+						"          TransactionTypeID,",
+						"          PurchaseOrderID,",
+						"          PaymentMethodID,",
+						"          SupplierInvoiceNumber,",
+						"          TransactionDate,",
+						"          AmountExcludingTax,",
+						"          TaxAmount,",
+						"          TransactionAmount,",
+						"          OutstandingBalance,",
+						"          FinalizationDate,",
+						"          IsFinalized,",
+						"          LastEditedBy,",
+						"          LastEditedWhen,",
+						"          IngestTime",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"surPurchase keyGenerate(output(SurKey as long),",
+						"     startAt: 1L,",
+						"     stepValue: 1L) ~> surrogateKey2",
+						"surSupplier keyGenerate(output(SurKey as long),",
+						"     startAt: 1L,",
+						"     stepValue: 1L) ~> surrogateKey1",
+						"surTransactions keyGenerate(output(SurKey as long),",
+						"     startAt: 1L,",
+						"     stepValue: 1L) ~> surrogateKey3",
+						"select1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          SupplierID as integer,",
+						"          SupplierName as string,",
+						"          SupplierCategoryID as integer,",
+						"          PrimaryContactPersonID as integer,",
+						"          AlternateContactPersonID as integer,",
+						"          DeliveryMethodID as integer,",
+						"          DeliveryCityID as integer,",
+						"          PostalCityID as integer,",
+						"          SupplierReference as string,",
+						"          BankAccountName as string,",
+						"          BankAccountBranch as string,",
+						"          BankAccountCode as string,",
+						"          BankAccountNumber as string,",
+						"          BankInternationalCode as string,",
+						"          PaymentDays as integer,",
+						"          InternalComments as string,",
+						"          PhoneNumber as string,",
+						"          FaxNumber as string,",
+						"          WebsiteURL as string,",
+						"          DeliveryAddressLine1 as string,",
+						"          DeliveryAddressLine2 as string,",
+						"          DeliveryPostalCode as string,",
+						"          DeliveryLocation as binary,",
+						"          PostalAddressLine1 as string,",
+						"          PostalAddressLine2 as string,",
+						"          PostalPostalCode as string,",
+						"          LastEditedBy as integer,",
+						"          ValidFrom as timestamp,",
+						"          ValidTo as timestamp,",
+						"          IngestTime as string,",
+						"          SurKey as long",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     recreate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          SurKey,",
+						"          SupplierID,",
+						"          SupplierName,",
+						"          SupplierCategoryID,",
+						"          PrimaryContactPersonID,",
+						"          AlternateContactPersonID,",
+						"          DeliveryMethodID,",
+						"          DeliveryCityID,",
+						"          PostalCityID,",
+						"          SupplierReference,",
+						"          BankAccountName,",
+						"          BankAccountBranch,",
+						"          BankAccountCode,",
+						"          BankAccountNumber,",
+						"          BankInternationalCode,",
+						"          PaymentDays,",
+						"          InternalComments,",
+						"          PhoneNumber,",
+						"          FaxNumber,",
+						"          WebsiteURL,",
+						"          DeliveryAddressLine1,",
+						"          DeliveryAddressLine2,",
+						"          DeliveryPostalCode,",
+						"          PostalAddressLine1,",
+						"          PostalAddressLine2,",
+						"          PostalPostalCode,",
+						"          LastEditedBy,",
+						"          ValidFrom,",
+						"          ValidTo,",
+						"          IngestTime",
+						"     )) ~> updatedSurSup",
+						"delMaxVal sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          PurchaseOrderLineID as integer,",
+						"          PurchaseOrderID as integer,",
+						"          StockItemID as integer,",
+						"          OrderedOuters as integer,",
+						"          Description as string,",
+						"          ReceivedOuters as integer,",
+						"          PackageTypeID as integer,",
+						"          ExpectedUnitPricePerOuter as decimal(18,2),",
+						"          LastReceiptDate as date,",
+						"          IsOrderLineFinalized as boolean,",
+						"          LastEditedBy as integer,",
+						"          LastEditedWhen as timestamp,",
+						"          IngestTime as string,",
+						"          SurKey as long",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     recreate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          SurKey,",
+						"          PurchaseOrderLineID,",
+						"          PurchaseOrderID,",
+						"          StockItemID,",
+						"          OrderedOuters,",
+						"          Description,",
+						"          ReceivedOuters,",
+						"          PackageTypeID,",
+						"          ExpectedUnitPricePerOuter,",
+						"          LastReceiptDate,",
+						"          IsOrderLineFinalized,",
+						"          LastEditedBy,",
+						"          LastEditedWhen,",
+						"          IngestTime",
+						"     )) ~> sink2",
+						"select2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          SupplierTransactionID as integer,",
+						"          SupplierID as integer,",
+						"          TransactionTypeID as integer,",
+						"          PurchaseOrderID as integer,",
+						"          PaymentMethodID as integer,",
+						"          SupplierInvoiceNumber as string,",
+						"          TransactionDate as date,",
+						"          AmountExcludingTax as decimal(18,2),",
+						"          TaxAmount as decimal(18,2),",
+						"          TransactionAmount as decimal(18,2),",
+						"          OutstandingBalance as decimal(18,2),",
+						"          FinalizationDate as date,",
+						"          IsFinalized as boolean,",
+						"          LastEditedBy as integer,",
+						"          LastEditedWhen as timestamp,",
+						"          IngestTime as string,",
+						"          SurKey as long",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     recreate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          SurKey,",
+						"          SupplierTransactionID,",
+						"          SupplierID,",
+						"          TransactionTypeID,",
+						"          PurchaseOrderID,",
+						"          PaymentMethodID,",
+						"          SupplierInvoiceNumber,",
+						"          TransactionDate,",
+						"          AmountExcludingTax,",
+						"          TaxAmount,",
+						"          TransactionAmount,",
+						"          OutstandingBalance,",
+						"          FinalizationDate,",
+						"          IsFinalized,",
+						"          LastEditedBy,",
+						"          LastEditedWhen,",
+						"          IngestTime",
+						"     )) ~> sink3"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/surSupplier')]",
+				"[concat(variables('factoryId'), '/datasets/surPOLines')]",
+				"[concat(variables('factoryId'), '/datasets/surTransactions')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GitCreateETL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "LookupPurchaseTables",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "SELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing'\n",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "RandomWWIStandard",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
 						"name": "CopyToPurchaseODS",
 						"type": "ForEach",
 						"dependsOn": [
 							{
-								"activity": "LookupPurchaseTables",
+								"activity": "LookupPurchaseTabs",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -237,14 +1441,21 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('LookupPurchaseTables').output.value",
+								"value": "@activity('LookupPurchaseTabs').output.value",
 								"type": "Expression"
 							},
 							"activities": [
 								{
 									"name": "CopyToODS",
 									"type": "Copy",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "TruncateStaging",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
 										"timeout": "7.00:00:00",
 										"retry": 0,
@@ -256,6 +1467,15 @@
 									"typeProperties": {
 										"source": {
 											"type": "AzureSqlSource",
+											"additionalColumns": [
+												{
+													"name": "IngestTime",
+													"value": {
+														"value": "@convertTimeZone(utcNow(),'UTC','Eastern Standard Time')",
+														"type": "Expression"
+													}
+												}
+											],
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
@@ -267,6 +1487,20 @@
 											"disableMetricsCollection": false
 										},
 										"enableStaging": false,
+										"enableSkipIncompatibleRow": true,
+										"logSettings": {
+											"enableCopyActivityLog": true,
+											"copyActivityLogSettings": {
+												"logLevel": "Warning",
+												"enableReliableLogging": false
+											},
+											"logLocationSettings": {
+												"linkedServiceName": {
+													"referenceName": "incompatibleDataWhileCopy",
+													"type": "LinkedServiceReference"
+												}
+											}
+										},
 										"translator": {
 											"type": "TabularTranslator",
 											"typeConversion": true,
@@ -278,14 +1512,23 @@
 									},
 									"inputs": [
 										{
-											"referenceName": "RandomWWIStandard",
+											"referenceName": "PurchaseTabs",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"schema": {
+													"value": "@item().table_schema",
+													"type": "Expression"
+												},
+												"table": {
+													"value": "@item().table_name",
+													"type": "Expression"
+												}
+											}
 										}
 									],
 									"outputs": [
 										{
-											"referenceName": "PurchaseODS",
+											"referenceName": "CopyToODSOutput",
 											"type": "DatasetReference",
 											"parameters": {
 												"schema": {
@@ -301,18 +1544,11 @@
 									]
 								},
 								{
-									"name": "Data flow1",
-									"type": "ExecuteDataFlow",
-									"dependsOn": [
-										{
-											"activity": "CopyToODS",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
+									"name": "TruncateStaging",
+									"type": "Lookup",
+									"dependsOn": [],
 									"policy": {
-										"timeout": "1.00:00:00",
+										"timeout": "7.00:00:00",
 										"retry": 0,
 										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
@@ -320,42 +1556,133 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
-										"dataflow": {
-											"referenceName": "addSurrogate",
-											"type": "DataFlowReference",
-											"parameters": {},
-											"datasetParameters": {
-												"CopyPurchaseOutput": {
-													"schema": {
-														"value": "@item().table_schema",
-														"type": "Expression"
-													},
-													"table": {
-														"value": "@item().table_name",
-														"type": "Expression"
-													}
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": "\nDECLARE @sql NVARCHAR(max)=''\n\nSELECT @sql += ' Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nExec Sp_executesql @sql\n\nSelect * from INFORMATION_SCHEMA.TABLES",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "CopyToODSOutput",
+											"type": "DatasetReference",
+											"parameters": {
+												"schema": {
+													"value": "@item().table_schema",
+													"type": "Expression"
 												},
-												"SurrogateAdded": {
-													"schema": {
-														"value": "@item().table_schema",
-														"type": "Expression"
-													},
-													"table": {
-														"value": "@concat('Surrogate_',item())",
-														"type": "Expression"
-													}
+												"table": {
+													"value": "@item().table_name",
+													"type": "Expression"
 												}
 											}
-										},
-										"staging": {},
-										"compute": {
-											"coreCount": 8,
-											"computeType": "General"
-										},
-										"traceLevel": "Fine"
+										}
 									}
 								}
 							]
+						}
+					},
+					{
+						"name": "LookupPurchaseTabs",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "\nSELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing'",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "randomWWITab",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "oneTimeSurrogate",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "CopyToPurchaseODS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "oneTimeSurrogate",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"DimSup": {},
+									"surSupplier": {},
+									"surPurchase": {},
+									"factPurchase": {},
+									"surTransactions": {},
+									"factTran": {},
+									"updatedSurSup": {},
+									"sink2": {},
+									"sink3": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "CreateIntegration",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "oneTimeSurrogate",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "DECLARE @sql0 NVARCHAR(max)=''\nSELECT @sql0 += ' Drop table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  table_schema = 'Integration'\nExec Sp_executesql @sql0\n\nDECLARE @sql nvarchar(max)\nDECLARE @sql2 nvarchar(max)\nSET @sql ='DROP SCHEMA IF EXISTS Integration'\nSET @sql2 = 'CREATE SCHEMA Integration'\nEXEC sp_executesql @sql\nEXEC sp_executesql @sql2\n\nSELECT s.SurKey as SupplierSKey\n\t, s.SupplierID\n\t, s.[SupplierName]\n\t, c.[SupplierCategoryName]\n\t, s.[PrimaryContactPersonID]\n\t, s.[SupplierReference]\n\t, s.[PaymentDays]\n\t, s.[PostalPostalCode]\n\t, s.[ValidFrom]\n\t, s.[ValidTo]\n\t, s.[IngestTime]\nINTO Integration.Suppliers\nFROM [Purchasing].[Surrogate_Suppliers] s\nLEFT JOIN Purchasing.SupplierCategories c \n\tON s.[SupplierCategoryID] = c.[SupplierCategoryID]\n\n\nSELECT ol.SurKey as PurchaseSKey\n\t, s.SurKey as SupplierSKey\n\t, o.[OrderDate]\n\t, o.[PurchaseOrderID]\n\t, ol.[OrderedOuters]\n\t, ol.[ReceivedOuters]\n\t, ol.[PackageTypeID]\n\t, o.[IsOrderFinalized]\n\t, o.[SupplierID]\n\t, ol.[StockItemID]\n\t, o.[LastEditedWhen]\n\t, ol.IngestTime\nINTO Integration.Purchase\nFROM [Purchasing].[Surrogate_PurchaseOrderLines] ol\nLEFT JOIN Purchasing.PurchaseOrders o\n\tON ol.[PurchaseOrderID] = o.[PurchaseOrderID]\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON o.SupplierID = s.SupplierID\n\n\nSELECT t.SurKey as TransSKey\n\t, t.[TransactionDate]\n\t, s.SurKey as SupplierSKey\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\n\t, t.[SupplierID]\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[LastEditedWhen]\n\t, t.IngestTime\nINTO Integration.Transactions\nFROM [Purchasing].[Surrogate_SupplierTransactions] t\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON t.SupplierID = s.SupplierID\n\nSELECT * \nFrom Integration.Suppliers",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "RandomODSTab",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
 						}
 					}
 				],
@@ -363,10 +1690,12 @@
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
 				},
-				"annotations": [],
-				"lastPublishTime": "2022-08-01T20:47:17Z"
+				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/randomWWITab')]",
+				"[concat(variables('factoryId'), '/dataflows/oneTimeSurrogate')]"
+			]
 		}
 	]
 }

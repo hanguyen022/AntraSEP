@@ -8,7 +8,13 @@
 		"PurchaseDW_connectionString": {
 			"value": ""
 		},
+		"PurchaseIntegration_connectionString": {
+			"value": ""
+		},
 		"PurchaseODS_connectionString": {
+			"value": ""
+		},
+		"incompatibleDataWhileCopy_connectionString": {
 			"value": ""
 		},
 		"wwiStandard_connectionString": {

@@ -11,9 +11,17 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'PurchaseDW'"
 		},
+		"PurchaseIntegration_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'PurchaseIntegration'"
+		},
 		"PurchaseODS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'PurchaseODS'"
+		},
+		"incompatibleDataWhileCopy_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'incompatibleDataWhileCopy'"
 		},
 		"wwiStandard_connectionString": {
 			"type": "secureString",
@@ -49,8 +57,14 @@
 					"PurchaseDW_connectionString": {
 						"value": "[parameters('PurchaseDW_connectionString')]"
 					},
+					"PurchaseIntegration_connectionString": {
+						"value": "[parameters('PurchaseIntegration_connectionString')]"
+					},
 					"PurchaseODS_connectionString": {
 						"value": "[parameters('PurchaseODS_connectionString')]"
+					},
+					"incompatibleDataWhileCopy_connectionString": {
+						"value": "[parameters('incompatibleDataWhileCopy_connectionString')]"
 					},
 					"wwiStandard_connectionString": {
 						"value": "[parameters('wwiStandard_connectionString')]"
@@ -58,6 +72,26 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "dtFactorySEP_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'dtFactorySEP_ArmTemplate_0')]"
+			]
 		}
 	]
 }
