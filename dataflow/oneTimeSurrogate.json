@@ -1,5 +1,5 @@
 {
-	"name": "addCompletedSurrogate",
+	"name": "oneTimeSurrogate",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
