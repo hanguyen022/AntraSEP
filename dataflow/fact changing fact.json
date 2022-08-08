@@ -23,7 +23,7 @@
 						"referenceName": "factPurchase",
 						"type": "DatasetReference"
 					},
-					"name": "maxLineage"
+					"name": "PurchasemaxLineage"
 				}
 			],
 			"sinks": [
@@ -89,13 +89,13 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select max([Lineage Key]) as maxLin\\nFrom Fact.Purchase',",
-				"     format: 'query') ~> maxLineage",
+				"     format: 'query') ~> PurchasemaxLineage",
 				"dimSup, IntePurchase join({WWI Supplier ID} == SupplierID,",
 				"     joinType:'right',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1, maxLineage join(1==1,",
+				"join1, PurchasemaxLineage join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
