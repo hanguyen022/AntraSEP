@@ -32,7 +32,7 @@
 						"referenceName": "dimSupplier",
 						"type": "DatasetReference"
 					},
-					"name": "dimSupp1"
+					"name": "sink1"
 				}
 			],
 			"transformations": [
@@ -135,6 +135,7 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
 				"          {Supplier Key} = SupplierSKey,",
@@ -171,6 +172,7 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
 				"          {Supplier Key},",
@@ -184,7 +186,7 @@
 				"          {Valid From},",
 				"          {Valid To},",
 				"          {Lineage Key}",
-				"     )) ~> dimSupp1"
+				"     )) ~> sink1"
 			]
 		}
 	}
