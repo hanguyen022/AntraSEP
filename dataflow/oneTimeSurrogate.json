@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "dimSuppliers",
+						"referenceName": "dimSupplier",
 						"type": "DatasetReference"
 					},
 					"name": "DimSup"
