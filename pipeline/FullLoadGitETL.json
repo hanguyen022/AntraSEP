@@ -133,7 +133,7 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderQuery": "\nDECLARE @sql NVARCHAR(max)=''\n\nSELECT @sql += ' Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nExec Sp_executesql @sql\n\nSelect * from INFORMATION_SCHEMA.TABLES",
+									"sqlReaderQuery": "DECLARE @sql NVARCHAR(max)=''\n\nSELECT @sql += ' Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nExec Sp_executesql @sql\n\nSelect * from INFORMATION_SCHEMA.TABLES",
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -171,7 +171,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "\nSELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing'",
+						"sqlReaderQuery": "SELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing' \n    or table_name = 'StockItems' \n    or table_name = 'PackageTypes'\n    or table_name = 'TransactionTypes'\n    or table_name = 'PaymentMethods'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -348,37 +348,6 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "SCD Type 2",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "fact changing fact",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "SCD Type 2",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "1.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "fact changing fact",
 						"type": "DataFlowReference"
 					},
 					"compute": {
