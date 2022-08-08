@@ -5,6 +5,9 @@
 			"referenceName": "PurchaseIntegration",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "main branch"
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [
