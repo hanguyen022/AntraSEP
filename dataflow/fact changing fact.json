@@ -1,0 +1,141 @@
+{
+	"name": "fact changing fact",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dimSupplier",
+						"type": "DatasetReference"
+					},
+					"name": "dimSup"
+				},
+				{
+					"dataset": {
+						"referenceName": "integrationPurchase",
+						"type": "DatasetReference"
+					},
+					"name": "IntePurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "factPurchase",
+						"type": "DatasetReference"
+					},
+					"name": "maxLineage"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "factPurchase",
+						"type": "DatasetReference"
+					},
+					"name": "factPurchase"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "addLineage"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Supplier Key} as integer,",
+				"          {WWI Supplier ID} as integer,",
+				"          Supplier as string,",
+				"          Category as string,",
+				"          {Primary Contact} as string,",
+				"          {Supplier Reference} as string,",
+				"          {Payment Days} as integer,",
+				"          {Postal Code} as string,",
+				"          {Valid From} as timestamp,",
+				"          {Valid To} as timestamp,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimSup",
+				"source(output(",
+				"          PurchaseSKey as long,",
+				"          SupplierSKey as long,",
+				"          OrderDate as date,",
+				"          PurchaseOrderID as integer,",
+				"          OrderedOuters as integer,",
+				"          ReceivedOuters as integer,",
+				"          PackageTypeID as integer,",
+				"          IsOrderFinalized as boolean,",
+				"          SupplierID as integer,",
+				"          StockItemID as integer,",
+				"          LastEditedWhen as timestamp,",
+				"          IngestTime as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> IntePurchase",
+				"source(output(",
+				"          maxLin as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max([Lineage Key]) as maxLin\\nFrom Fact.Purchase',",
+				"     format: 'query') ~> maxLineage",
+				"dimSup, IntePurchase join({WWI Supplier ID} == SupplierID,",
+				"     joinType:'right',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1, maxLineage join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2 derive(maxLin = 1+maxLin) ~> addLineage",
+				"addLineage sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {Purchase Key} as long,",
+				"          {Date Key} as date,",
+				"          {Supplier Key} as integer,",
+				"          {Stock Item Key} as integer,",
+				"          {WWI Purchase Order ID} as integer,",
+				"          {Ordered Outers} as integer,",
+				"          {Ordered Quantity} as integer,",
+				"          {Received Outers} as integer,",
+				"          Package as string,",
+				"          {Is Order Finalized} as boolean,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          {Date Key} = OrderDate,",
+				"          {Supplier Key},",
+				"          {Stock Item Key} = StockItemID,",
+				"          {WWI Purchase Order ID} = PurchaseOrderID,",
+				"          {Ordered Outers} = OrderedOuters,",
+				"          {Received Outers} = ReceivedOuters,",
+				"          Package = PackageTypeID,",
+				"          {Is Order Finalized} = IsOrderFinalized,",
+				"          {Lineage Key} = maxLin",
+				"     )) ~> factPurchase"
+			]
+		}
+	}
+}
