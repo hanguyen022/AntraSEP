@@ -1,6 +1,9 @@
 {
 	"name": "updateSurrogate",
 	"properties": {
+		"folder": {
+			"name": "add then update Surrogate"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
