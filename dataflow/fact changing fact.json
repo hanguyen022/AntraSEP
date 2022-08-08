@@ -23,7 +23,21 @@
 						"referenceName": "factPurchase",
 						"type": "DatasetReference"
 					},
-					"name": "PurchasemaxLineage"
+					"name": "PurchaseMaxLin"
+				},
+				{
+					"dataset": {
+						"referenceName": "IntegrationTrans",
+						"type": "DatasetReference"
+					},
+					"name": "IntegrationTrans"
+				},
+				{
+					"dataset": {
+						"referenceName": "factTransactions",
+						"type": "DatasetReference"
+					},
+					"name": "TransMaxLin"
 				}
 			],
 			"sinks": [
@@ -33,6 +47,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "factPurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "factTransactions",
+						"type": "DatasetReference"
+					},
+					"name": "factTrans"
 				}
 			],
 			"transformations": [
@@ -44,6 +65,15 @@
 				},
 				{
 					"name": "addLineage"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
@@ -89,18 +119,59 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select max([Lineage Key]) as maxLin\\nFrom Fact.Purchase',",
-				"     format: 'query') ~> PurchasemaxLineage",
+				"     format: 'query') ~> PurchaseMaxLin",
+				"source(output(",
+				"          TransSKey as long,",
+				"          TransactionDate as date,",
+				"          SupplierSKey as long,",
+				"          SupplierTransactionID as integer,",
+				"          PurchaseOrderID as integer,",
+				"          SupplierInvoiceNumber as string,",
+				"          AmountExcludingTax as decimal(18,2),",
+				"          TaxAmount as decimal(18,2),",
+				"          TransactionAmount as decimal(18,2),",
+				"          OutstandingBalance as decimal(18,2),",
+				"          IsFinalized as boolean,",
+				"          SupplierID as integer,",
+				"          TransactionTypeID as integer,",
+				"          PaymentMethodID as integer,",
+				"          LastEditedWhen as timestamp,",
+				"          IngestTime as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> IntegrationTrans",
+				"source(output(",
+				"          maxLin as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max([Lineage Key]) as maxLin\\nFrom [Fact].[Transaction]',",
+				"     format: 'query') ~> TransMaxLin",
 				"dimSup, IntePurchase join({WWI Supplier ID} == SupplierID,",
 				"     joinType:'right',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1, PurchasemaxLineage join(1==1,",
+				"join1, PurchaseMaxLin join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
 				"join2 derive(maxLin = 1+maxLin) ~> addLineage",
+				"IntegrationTrans, dimSup join(SupplierID == {WWI Supplier ID},",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3, TransMaxLin join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4 derive(maxLin = 1+maxLin) ~> derivedColumn1",
 				"addLineage sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -134,7 +205,52 @@
 				"          Package = PackageTypeID,",
 				"          {Is Order Finalized} = IsOrderFinalized,",
 				"          {Lineage Key} = maxLin",
-				"     )) ~> factPurchase"
+				"     )) ~> factPurchase",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {Transaction Key} as long,",
+				"          {Date Key} as date,",
+				"          {Customer Key} as integer,",
+				"          {Bill To Customer Key} as integer,",
+				"          {Supplier Key} as integer,",
+				"          {Transaction Type Key} as integer,",
+				"          {Payment Method Key} as integer,",
+				"          {WWI Customer Transaction ID} as integer,",
+				"          {WWI Supplier Transaction ID} as integer,",
+				"          {WWI Invoice ID} as integer,",
+				"          {WWI Purchase Order ID} as integer,",
+				"          {Supplier Invoice Number} as string,",
+				"          {Total Excluding Tax} as decimal(18,2),",
+				"          {Tax Amount} as decimal(18,2),",
+				"          {Total Including Tax} as decimal(18,2),",
+				"          {Outstanding Balance} as decimal(18,2),",
+				"          {Is Finalized} as boolean,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          {Date Key} = TransactionDate,",
+				"          {Supplier Key},",
+				"          {Transaction Type Key} = TransactionTypeID,",
+				"          {Payment Method Key} = PaymentMethodID,",
+				"          {WWI Supplier Transaction ID} = SupplierTransactionID,",
+				"          {WWI Purchase Order ID} = PurchaseOrderID,",
+				"          {Supplier Invoice Number} = SupplierInvoiceNumber,",
+				"          {Total Excluding Tax} = AmountExcludingTax,",
+				"          {Tax Amount} = TaxAmount,",
+				"          {Total Including Tax} = TransactionAmount,",
+				"          {Outstanding Balance} = OutstandingBalance,",
+				"          {Is Finalized} = IsFinalized,",
+				"          {Lineage Key} = maxLin",
+				"     )) ~> factTrans"
 			]
 		}
 	}
