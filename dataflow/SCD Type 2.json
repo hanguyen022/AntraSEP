@@ -22,10 +22,17 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "dimSuppliers",
+						"referenceName": "dimSupplier",
 						"type": "DatasetReference"
 					},
 					"name": "dimSupp"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimSupplier",
+						"type": "DatasetReference"
+					},
+					"name": "dimSupp1"
 				}
 			],
 			"transformations": [
@@ -33,12 +40,24 @@
 					"name": "ChangeValidFrom"
 				},
 				{
-					"name": "lookupExistingRecords"
+					"name": "SameIDRecords"
+				},
+				{
+					"name": "RecordsToChange"
+				},
+				{
+					"name": "ColsFromDW"
+				},
+				{
+					"name": "ChangeValidToCurrent"
+				},
+				{
+					"name": "Update"
 				}
 			],
 			"scriptLines": [
 				"source(output(",
-				"          SupplierSKey as long,",
+				"          SupplierSKey as integer,",
 				"          SupplierID as integer,",
 				"          SupplierName as string,",
 				"          SupplierCategoryName as string,",
@@ -73,9 +92,27 @@
 				"     format: 'table') ~> dimSup",
 				"IntegrationSupplier derive(ValidFrom = currentTimestamp()) ~> ChangeValidFrom",
 				"IntegrationSupplier, dimSup lookup(SupplierID == {WWI Supplier ID},",
-				"     multiple: false,",
-				"     pickup: 'any',",
-				"     broadcast: 'auto')~> lookupExistingRecords",
+				"     multiple: true,",
+				"     broadcast: 'auto',",
+				"     pickup: 'any')~> SameIDRecords",
+				"SameIDRecords filter(lesserOrEqual(toTimestamp('9999-12-31 23:59:59.9999998'), {Valid To})) ~> RecordsToChange",
+				"RecordsToChange select(mapColumn(",
+				"          {Supplier Key},",
+				"          {WWI Supplier ID},",
+				"          Supplier,",
+				"          Category,",
+				"          {Primary Contact},",
+				"          {Supplier Reference},",
+				"          {Payment Days},",
+				"          {Postal Code},",
+				"          {Valid From},",
+				"          {Valid To},",
+				"          {Lineage Key}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ColsFromDW",
+				"ColsFromDW derive({Valid To} = currentTimestamp()) ~> ChangeValidToCurrent",
+				"ChangeValidToCurrent alterRow(updateIf(1==1)) ~> Update",
 				"ChangeValidFrom sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -98,7 +135,56 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> dimSupp"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          {Supplier Key} = SupplierSKey,",
+				"          {WWI Supplier ID} = SupplierID,",
+				"          Supplier = SupplierName,",
+				"          Category = SupplierCategoryName,",
+				"          {Primary Contact} = PrimaryContactPersonID,",
+				"          {Supplier Reference} = SupplierReference,",
+				"          {Payment Days} = PaymentDays,",
+				"          {Postal Code} = PostalPostalCode,",
+				"          {Valid From} = ValidFrom,",
+				"          {Valid To} = ValidTo",
+				"     )) ~> dimSupp",
+				"Update sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {Supplier Key} as integer,",
+				"          {WWI Supplier ID} as integer,",
+				"          Supplier as string,",
+				"          Category as string,",
+				"          {Primary Contact} as string,",
+				"          {Supplier Reference} as string,",
+				"          {Payment Days} as integer,",
+				"          {Postal Code} as string,",
+				"          {Valid From} as timestamp,",
+				"          {Valid To} as timestamp,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['Supplier Key'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          {Supplier Key},",
+				"          {WWI Supplier ID},",
+				"          Supplier,",
+				"          Category,",
+				"          {Primary Contact},",
+				"          {Supplier Reference},",
+				"          {Payment Days},",
+				"          {Postal Code},",
+				"          {Valid From},",
+				"          {Valid To},",
+				"          {Lineage Key}",
+				"     )) ~> dimSupp1"
 			]
 		}
 	}
