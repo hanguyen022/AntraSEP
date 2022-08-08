@@ -196,15 +196,8 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
-				"          {Date Key} = OrderDate,",
 				"          {Supplier Key},",
-				"          {Stock Item Key} = StockItemID,",
-				"          {WWI Purchase Order ID} = PurchaseOrderID,",
-				"          {Ordered Outers} = OrderedOuters,",
-				"          {Received Outers} = ReceivedOuters,",
-				"          Package = PackageTypeID,",
-				"          {Is Order Finalized} = IsOrderFinalized,",
-				"          {Lineage Key} = maxLin",
+				"          {Lineage Key}",
 				"     )) ~> factPurchase",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -249,7 +242,7 @@
 				"          {Total Including Tax} = TransactionAmount,",
 				"          {Outstanding Balance} = OutstandingBalance,",
 				"          {Is Finalized} = IsFinalized,",
-				"          {Lineage Key} = maxLin",
+				"          {Lineage Key}",
 				"     )) ~> factTrans"
 			]
 		}
