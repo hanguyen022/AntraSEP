@@ -17,13 +17,6 @@
 						"type": "DatasetReference"
 					},
 					"name": "dimSup"
-				},
-				{
-					"dataset": {
-						"referenceName": "dimSupplier",
-						"type": "DatasetReference"
-					},
-					"name": "maxLineage"
 				}
 			],
 			"sinks": [
@@ -60,9 +53,6 @@
 				},
 				{
 					"name": "Update"
-				},
-				{
-					"name": "join1"
 				},
 				{
 					"name": "derivedColumn1"
@@ -103,14 +93,6 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> dimSup",
-				"source(output(",
-				"          maxLin as integer",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'select max([Lineage Key]) as maxLin\\nFrom [Dimension].[Supplier]',",
-				"     format: 'query') ~> maxLineage",
 				"IntegrationSupplier derive(ValidFrom = currentTimestamp()) ~> ChangeValidFrom",
 				"IntegrationSupplier, dimSup lookup(SupplierID == {WWI Supplier ID},",
 				"     multiple: true,",
@@ -134,12 +116,7 @@
 				"     skipDuplicateMapOutputs: true) ~> ColsFromDW",
 				"ColsFromDW derive({Valid To} = currentTimestamp()) ~> ChangeValidToCurrent",
 				"ChangeValidToCurrent alterRow(updateIf(1==1)) ~> Update",
-				"ChangeValidFrom, maxLineage join(1==1,",
-				"     joinType:'cross',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join1",
-				"join1 derive(maxLin = 1+maxLin) ~> derivedColumn1",
+				"ChangeValidFrom derive(Lineage = 0) ~> derivedColumn1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -175,7 +152,7 @@
 				"          {Postal Code} = PostalPostalCode,",
 				"          {Valid From} = ValidFrom,",
 				"          {Valid To} = ValidTo,",
-				"          {Lineage Key} = maxLin",
+				"          {Lineage Key} = Lineage",
 				"     )) ~> dimSupp",
 				"Update sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
