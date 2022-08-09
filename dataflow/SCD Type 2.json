@@ -67,13 +67,6 @@
 						"referenceName": "dimSupplier",
 						"type": "DatasetReference"
 					},
-					"name": "dimSupp"
-				},
-				{
-					"dataset": {
-						"referenceName": "dimSupplier",
-						"type": "DatasetReference"
-					},
 					"name": "sink1"
 				},
 				{
@@ -117,6 +110,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "dimStockItems"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimSupplier",
+						"type": "DatasetReference"
+					},
+					"name": "dimSupp"
 				}
 			],
 			"transformations": [
@@ -195,11 +195,11 @@
 			],
 			"scriptLines": [
 				"source(output(",
-				"          SupplierSKey as integer,",
+				"          SupplierSKey as long,",
 				"          SupplierID as integer,",
 				"          SupplierName as string,",
 				"          SupplierCategoryName as string,",
-				"          PrimaryContactPersonID as integer,",
+				"          FullName as string,",
 				"          SupplierReference as string,",
 				"          PaymentDays as integer,",
 				"          PostalPostalCode as string,",
@@ -432,43 +432,6 @@
 				"derivedColumn6 alterRow(updateIf(1==1)) ~> alterRow3",
 				"inteStockItem derive(ValidFrom = currentTimestamp(),",
 				"          Lineage = 0) ~> derivedColumn7",
-				"ChangeValidFrom sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
-				"          {Supplier Key} as integer,",
-				"          {WWI Supplier ID} as integer,",
-				"          Supplier as string,",
-				"          Category as string,",
-				"          {Primary Contact} as string,",
-				"          {Supplier Reference} as string,",
-				"          {Payment Days} as integer,",
-				"          {Postal Code} as string,",
-				"          {Valid From} as timestamp,",
-				"          {Valid To} as timestamp,",
-				"          {Lineage Key} as integer",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     saveOrder: 2,",
-				"     errorHandlingOption: 'stopOnFirstError',",
-				"     mapColumn(",
-				"          {Supplier Key} = SupplierSKey,",
-				"          {WWI Supplier ID} = SupplierID,",
-				"          Supplier = SupplierName,",
-				"          Category = SupplierCategoryName,",
-				"          {Primary Contact} = PrimaryContactPersonID,",
-				"          {Supplier Reference} = SupplierReference,",
-				"          {Payment Days} = PaymentDays,",
-				"          {Postal Code} = PostalPostalCode,",
-				"          {Valid From} = ValidFrom,",
-				"          {Valid To} = ValidTo,",
-				"          {Lineage Key} = Lineage",
-				"     )) ~> dimSupp",
 				"Update sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -720,7 +683,43 @@
 				"          {Valid From} = ValidFrom,",
 				"          {Valid To} = ValidTo,",
 				"          {Lineage Key} = Lineage",
-				"     )) ~> dimStockItems"
+				"     )) ~> dimStockItems",
+				"ChangeValidFrom sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {Supplier Key} as integer,",
+				"          {WWI Supplier ID} as integer,",
+				"          Supplier as string,",
+				"          Category as string,",
+				"          {Primary Contact} as string,",
+				"          {Supplier Reference} as string,",
+				"          {Payment Days} as integer,",
+				"          {Postal Code} as string,",
+				"          {Valid From} as timestamp,",
+				"          {Valid To} as timestamp,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          {Supplier Key} = SupplierSKey,",
+				"          {WWI Supplier ID} = SupplierID,",
+				"          Supplier = SupplierName,",
+				"          Category = SupplierCategoryName,",
+				"          {Primary Contact} = FullName,",
+				"          {Supplier Reference} = SupplierReference,",
+				"          {Payment Days} = PaymentDays,",
+				"          {Postal Code} = PostalPostalCode,",
+				"          {Valid From} = ValidFrom,",
+				"          {Valid To} = ValidTo,",
+				"          {Lineage Key} = Lineage",
+				"     )) ~> dimSupp"
 			]
 		}
 	}
