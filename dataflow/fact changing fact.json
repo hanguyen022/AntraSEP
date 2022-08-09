@@ -20,24 +20,10 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "factPurchase",
-						"type": "DatasetReference"
-					},
-					"name": "PurchaseMaxLin"
-				},
-				{
-					"dataset": {
 						"referenceName": "IntegrationTrans",
 						"type": "DatasetReference"
 					},
 					"name": "IntegrationTrans"
-				},
-				{
-					"dataset": {
-						"referenceName": "factTransactions",
-						"type": "DatasetReference"
-					},
-					"name": "TransMaxLin"
 				}
 			],
 			"sinks": [
@@ -61,16 +47,10 @@
 					"name": "join1"
 				},
 				{
-					"name": "join2"
-				},
-				{
-					"name": "addLineage"
+					"name": "addLineage0"
 				},
 				{
 					"name": "join3"
-				},
-				{
-					"name": "join4"
 				},
 				{
 					"name": "derivedColumn1"
@@ -113,14 +93,6 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> IntePurchase",
 				"source(output(",
-				"          maxLin as integer",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'select max([Lineage Key]) as maxLin\\nFrom Fact.Purchase',",
-				"     format: 'query') ~> PurchaseMaxLin",
-				"source(output(",
 				"          TransSKey as long,",
 				"          TransactionDate as date,",
 				"          SupplierSKey as long,",
@@ -142,37 +114,20 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> IntegrationTrans",
-				"source(output(",
-				"          maxLin as integer",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'select max([Lineage Key]) as maxLin\\nFrom [Fact].[Transaction]',",
-				"     format: 'query') ~> TransMaxLin",
 				"dimSup, IntePurchase join({WWI Supplier ID} == SupplierID,",
 				"     joinType:'right',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1, PurchaseMaxLin join(1==1,",
-				"     joinType:'cross',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join2",
-				"join2 derive(maxLin = 1+maxLin) ~> addLineage",
+				"join1 derive(Lineage = 0) ~> addLineage0",
 				"IntegrationTrans, dimSup join(SupplierID == {WWI Supplier ID},",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"join3, TransMaxLin join(1==1,",
-				"     joinType:'cross',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join4",
-				"join4 derive(maxLin = 1+maxLin) ~> derivedColumn1",
-				"addLineage sink(allowSchemaDrift: true,",
+				"join3 derive(Lineage = 0\r",
+				") ~> derivedColumn1",
+				"addLineage0 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          {Purchase Key} as long,",
@@ -196,7 +151,9 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
+				"          {Date Key} = OrderDate,",
 				"          {Supplier Key},",
+				"          {Stock Item Key} = StockItemID,",
 				"          {Lineage Key}",
 				"     )) ~> factPurchase",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
