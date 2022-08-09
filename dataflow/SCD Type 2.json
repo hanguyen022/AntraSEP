@@ -665,6 +665,7 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
+				"          {WWI Stock Item ID} = StockItemID,",
 				"          {Stock Item} = StockItemName,",
 				"          Color = ColorID,",
 				"          {Selling Package} = OuterPackageID,",
