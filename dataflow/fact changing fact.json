@@ -65,7 +65,7 @@
 			],
 			"transformations": [
 				{
-					"name": "join3"
+					"name": "joinDimSup"
 				},
 				{
 					"name": "derivedColumn1"
@@ -78,17 +78,25 @@
 				},
 				{
 					"name": "derivedColumn2"
+				},
+				{
+					"name": "joinDimTransType"
+				},
+				{
+					"name": "joinDimPaymentMethod"
 				}
 			],
 			"scriptLines": [
 				"source(output(",
 				"          PurchaseSKey as long,",
 				"          SupplierSKey as long,",
+				"          StockItemSKey as long,",
 				"          OrderDate as date,",
 				"          PurchaseOrderID as integer,",
 				"          OrderedOuters as integer,",
+				"          OrderedQuantity as integer,",
 				"          ReceivedOuters as integer,",
-				"          PackageTypeID as integer,",
+				"          PackageTypeName as string,",
 				"          IsOrderFinalized as boolean,",
 				"          SupplierID as integer,",
 				"          StockItemID as integer,",
@@ -104,6 +112,8 @@
 				"          TransSKey as long,",
 				"          TransactionDate as date,",
 				"          SupplierSKey as long,",
+				"          TransactionTypeSKey as long,",
+				"          PaymentMethodSKey as long,",
 				"          SupplierTransactionID as integer,",
 				"          PurchaseOrderID as integer,",
 				"          SupplierInvoiceNumber as string,",
@@ -189,13 +199,12 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> dimSup",
-				"IntegrationTrans join(SupplierID == {WWI Supplier ID},",
+				"IntegrationTrans, dimSup join(SupplierID == {WWI Supplier ID},",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join3",
-				"join3 derive(Lineage = 0\r",
-				") ~> derivedColumn1",
+				"     broadcast: 'auto')~> joinDimSup",
+				"joinDimPaymentMethod derive(Lineage = 0) ~> derivedColumn1",
 				"IntePurchase, dimSup join(SupplierID == {WWI Supplier ID},",
 				"     joinType:'left',",
 				"     matchType:'exact',",
@@ -207,6 +216,16 @@
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
 				"join5 derive(Lineage = 0) ~> derivedColumn2",
+				"joinDimSup, dimTransType join(TransactionTypeID == {WWI Transaction Type ID},",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinDimTransType",
+				"joinDimTransType, dimPaymentMethod join(PaymentMethodID == {WWI Payment Method ID},",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinDimPaymentMethod",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -239,9 +258,9 @@
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
 				"          {Date Key} = TransactionDate,",
-				"          {Supplier Key},",
-				"          {Transaction Type Key} = TransactionTypeID,",
-				"          {Payment Method Key} = PaymentMethodID,",
+				"          {Supplier Key} = SupplierSKey,",
+				"          {Transaction Type Key} = TransactionTypeSKey,",
+				"          {Payment Method Key} = PaymentMethodSKey,",
 				"          {WWI Supplier Transaction ID} = SupplierTransactionID,",
 				"          {WWI Purchase Order ID} = PurchaseOrderID,",
 				"          {Supplier Invoice Number} = SupplierInvoiceNumber,",
@@ -250,7 +269,7 @@
 				"          {Total Including Tax} = TransactionAmount,",
 				"          {Outstanding Balance} = OutstandingBalance,",
 				"          {Is Finalized} = IsFinalized,",
-				"          {Lineage Key}",
+				"          {Lineage Key} = Lineage",
 				"     )) ~> factTrans",
 				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -276,8 +295,16 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
+				"          {Date Key} = OrderDate,",
 				"          {Supplier Key},",
-				"          {Stock Item Key}",
+				"          {Stock Item Key},",
+				"          {WWI Purchase Order ID} = PurchaseOrderID,",
+				"          {Ordered Outers} = OrderedOuters,",
+				"          {Ordered Quantity} = OrderedQuantity,",
+				"          {Received Outers} = ReceivedOuters,",
+				"          Package = PackageTypeName,",
+				"          {Is Order Finalized} = IsOrderFinalized,",
+				"          {Lineage Key} = Lineage",
 				"     )) ~> factPurchase"
 			]
 		}
