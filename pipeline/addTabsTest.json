@@ -3,9 +3,184 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "SCD Type 2",
+				"name": "fact changing fact",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "SCD Type 2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "fact changing fact",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "oneTimeSurrogate",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "oneTimeSurrogate",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "CreateIntegration",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "oneTimeSurrogate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "DECLARE @sql0 NVARCHAR(max)=''\nSELECT @sql0 += ' Drop table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  table_schema = 'Integration'\nExec Sp_executesql @sql0\n\nDECLARE @sql nvarchar(max)\nDECLARE @sql2 nvarchar(max)\nSET @sql ='DROP SCHEMA IF EXISTS Integration'\nSET @sql2 = 'CREATE SCHEMA Integration'\nEXEC sp_executesql @sql\nEXEC sp_executesql @sql2\n\nSELECT s.SurKey as SupplierSKey\n\t, s.SupplierID\n\t, s.[SupplierName]\n\t, c.[SupplierCategoryName]\n\t, p.[FullName]\n\t, s.[SupplierReference]\n\t, s.[PaymentDays]\n\t, s.[PostalPostalCode]\n\t, s.[ValidFrom]\n\t, s.[ValidTo]\n\t, s.[IngestTime]\nINTO Integration.Suppliers\nFROM [Purchasing].[Surrogate_Suppliers] s\nLEFT JOIN Purchasing.SupplierCategories c \n\tON s.[SupplierCategoryID] = c.[SupplierCategoryID]\nLEFT JOIN Application.People p\n\tON s.[PrimaryContactPersonID] = p.PersonID\n\nSELECT ol.SurKey as PurchaseSKey\n\t, s.SurKey as SupplierSKey\n\t, si.SurKey as StockItemSKey\n\t, o.[OrderDate]\n\t, o.[PurchaseOrderID]\n\t, ol.[OrderedOuters]\n\t, (si.[QuantityPerOuter]*ol.[OrderedOuters]) as OrderedQuantity\n\t, ol.[ReceivedOuters]\n\t, pt.[PackageTypeName]\n\t, o.[IsOrderFinalized]\n\t, o.[SupplierID]\n\t, ol.[StockItemID]\n\t, o.[LastEditedWhen]\n\t, ol.IngestTime\nINTO Integration.Purchase\nFROM [Purchasing].[Surrogate_PurchaseOrderLines] ol\nLEFT JOIN Purchasing.PurchaseOrders o\n\tON ol.[PurchaseOrderID] = o.[PurchaseOrderID]\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON o.SupplierID = s.SupplierID\nLEFT JOIN Warehouse.Surrogate_StockItems si\n\tON si.StockItemID = ol.StockItemID\nLEFT JOIN Warehouse.PackageTypes pt\n\tON pt.PackageTypeID = ol.PackageTypeID\n\nSELECT t.SurKey as TransSKey\n\t, t.[TransactionDate]\n\t, s.SurKey as SupplierSKey\n\t, att.SurKey as TransactionTypeSKey\n\t, pm.[SurKey] as PaymentMethodSKey\n\t, t.[SupplierTransactionID]\n\t, t.[PurchaseOrderID]\n\t, t.[SupplierInvoiceNumber]\n\t, t.[AmountExcludingTax]\n\t, t.[TaxAmount]\n\t, t.[TransactionAmount]\n\t, t.[OutstandingBalance]\n\t, t.[IsFinalized]\n\t, t.[SupplierID]\n\t, t.[TransactionTypeID]\n\t, t.[PaymentMethodID]\n\t, t.[LastEditedWhen]\n\t, t.IngestTime\nINTO Integration.Transactions\nFROM [Purchasing].[Surrogate_SupplierTransactions] t\nLEFT JOIN Purchasing.Surrogate_Suppliers s\n\tON t.SupplierID = s.SupplierID\nLEFT JOIN Application.Surrogate_TransactionTypes att\n\tON att.TransactionTypeID = t.TransactionTypeID\nLEFT JOIN Application.Surrogate_PaymentMethods pm\n\tON pm.PaymentMethodID = t.PaymentMethodID\n\nSelect * \nINTO Integration.TransactionTypes\nFROM Application.Surrogate_TransactionTypes\n\nSelect * \nINTO Integration.PaymentMethods\nFROM Application.Surrogate_PaymentMethods\n\nSelect *\nINTO Integration.StockItems\nFROM Warehouse.Surrogate_StockItems\n\n\nSELECT * \nFrom Integration.Suppliers",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "RandomODSTab",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CopyToPurchaseIntegration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "CreateIntegration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('integrationTabList')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "CopyIntegratonTabsToNewDTB",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ODSIntegrationTabs",
+									"type": "DatasetReference",
+									"parameters": {
+										"table": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "IntegrationDTBTabs",
+									"type": "DatasetReference",
+									"parameters": {
+										"table": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "SCD Type 2",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "CopyToPurchaseIntegration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "1.00:00:00",
 					"retry": 0,
