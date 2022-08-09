@@ -6,13 +6,6 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "dimSupplier",
-						"type": "DatasetReference"
-					},
-					"name": "dimSup"
-				},
-				{
-					"dataset": {
 						"referenceName": "integrationPurchase",
 						"type": "DatasetReference"
 					},
@@ -24,56 +17,70 @@
 						"type": "DatasetReference"
 					},
 					"name": "IntegrationTrans"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimStockItem",
+						"type": "DatasetReference"
+					},
+					"name": "dimStockItem"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimPaymentMethod",
+						"type": "DatasetReference"
+					},
+					"name": "dimPaymentMethod"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimTransactionTypes",
+						"type": "DatasetReference"
+					},
+					"name": "dimTransType"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimSupplier",
+						"type": "DatasetReference"
+					},
+					"name": "dimSup"
 				}
 			],
 			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "factPurchase",
-						"type": "DatasetReference"
-					},
-					"name": "factPurchase"
-				},
 				{
 					"dataset": {
 						"referenceName": "factTransactions",
 						"type": "DatasetReference"
 					},
 					"name": "factTrans"
+				},
+				{
+					"dataset": {
+						"referenceName": "factPurchase",
+						"type": "DatasetReference"
+					},
+					"name": "factPurchase"
 				}
 			],
 			"transformations": [
-				{
-					"name": "join1"
-				},
-				{
-					"name": "addLineage0"
-				},
 				{
 					"name": "join3"
 				},
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "join5"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
-				"source(output(",
-				"          {Supplier Key} as integer,",
-				"          {WWI Supplier ID} as integer,",
-				"          Supplier as string,",
-				"          Category as string,",
-				"          {Primary Contact} as string,",
-				"          {Supplier Reference} as string,",
-				"          {Payment Days} as integer,",
-				"          {Postal Code} as string,",
-				"          {Valid From} as timestamp,",
-				"          {Valid To} as timestamp,",
-				"          {Lineage Key} as integer",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> dimSup",
 				"source(output(",
 				"          PurchaseSKey as long,",
 				"          SupplierSKey as long,",
@@ -91,7 +98,8 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> IntePurchase",
+				"     query: 'select  *\\nfrom Integration.Purchase',",
+				"     format: 'query') ~> IntePurchase",
 				"source(output(",
 				"          TransSKey as long,",
 				"          TransactionDate as date,",
@@ -114,48 +122,91 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> IntegrationTrans",
-				"dimSup, IntePurchase join({WWI Supplier ID} == SupplierID,",
-				"     joinType:'right',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join1",
-				"join1 derive(Lineage = 0) ~> addLineage0",
-				"IntegrationTrans, dimSup join(SupplierID == {WWI Supplier ID},",
-				"     joinType:'inner',",
+				"source(output(",
+				"          {Stock Item Key} as integer,",
+				"          {WWI Stock Item ID} as integer,",
+				"          {Stock Item} as string,",
+				"          Color as string,",
+				"          {Selling Package} as string,",
+				"          {Buying Package} as string,",
+				"          Brand as string,",
+				"          Size as string,",
+				"          {Lead Time Days} as integer,",
+				"          {Quantity Per Outer} as integer,",
+				"          {Is Chiller Stock} as boolean,",
+				"          Barcode as string,",
+				"          {Tax Rate} as decimal(18,3),",
+				"          {Unit Price} as decimal(18,2),",
+				"          {Recommended Retail Price} as decimal(18,2),",
+				"          {Typical Weight Per Unit} as decimal(18,3),",
+				"          Photo as binary,",
+				"          {Valid From} as timestamp,",
+				"          {Valid To} as timestamp,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimStockItem",
+				"source(output(",
+				"          {Payment Method Key} as integer,",
+				"          {WWI Payment Method ID} as integer,",
+				"          {Payment Method} as string,",
+				"          {Valid From} as timestamp,",
+				"          {Valid To} as timestamp,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimPaymentMethod",
+				"source(output(",
+				"          {Transaction Type Key} as integer,",
+				"          {WWI Transaction Type ID} as integer,",
+				"          {Transaction Type} as string,",
+				"          {Valid From} as timestamp,",
+				"          {Valid To} as timestamp,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimTransType",
+				"source(output(",
+				"          {Supplier Key} as integer,",
+				"          {WWI Supplier ID} as integer,",
+				"          Supplier as string,",
+				"          Category as string,",
+				"          {Primary Contact} as string,",
+				"          {Supplier Reference} as string,",
+				"          {Payment Days} as integer,",
+				"          {Postal Code} as string,",
+				"          {Valid From} as timestamp,",
+				"          {Valid To} as timestamp,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimSup",
+				"IntegrationTrans join(SupplierID == {WWI Supplier ID},",
+				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
 				"join3 derive(Lineage = 0\r",
 				") ~> derivedColumn1",
-				"addLineage0 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
-				"          {Purchase Key} as long,",
-				"          {Date Key} as date,",
-				"          {Supplier Key} as integer,",
-				"          {Stock Item Key} as integer,",
-				"          {WWI Purchase Order ID} as integer,",
-				"          {Ordered Outers} as integer,",
-				"          {Ordered Quantity} as integer,",
-				"          {Received Outers} as integer,",
-				"          Package as string,",
-				"          {Is Order Finalized} as boolean,",
-				"          {Lineage Key} as integer",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError',",
-				"     mapColumn(",
-				"          {Date Key} = OrderDate,",
-				"          {Supplier Key},",
-				"          {Stock Item Key} = StockItemID,",
-				"          {Lineage Key}",
-				"     )) ~> factPurchase",
+				"IntePurchase, dimSup join(SupplierID == {WWI Supplier ID},",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4, dimStockItem join(StockItemID == {WWI Stock Item ID},",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
+				"join5 derive(Lineage = 0) ~> derivedColumn2",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -200,7 +251,34 @@
 				"          {Outstanding Balance} = OutstandingBalance,",
 				"          {Is Finalized} = IsFinalized,",
 				"          {Lineage Key}",
-				"     )) ~> factTrans"
+				"     )) ~> factTrans",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {Purchase Key} as long,",
+				"          {Date Key} as date,",
+				"          {Supplier Key} as integer,",
+				"          {Stock Item Key} as integer,",
+				"          {WWI Purchase Order ID} as integer,",
+				"          {Ordered Outers} as integer,",
+				"          {Ordered Quantity} as integer,",
+				"          {Received Outers} as integer,",
+				"          Package as string,",
+				"          {Is Order Finalized} as boolean,",
+				"          {Lineage Key} as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          {Supplier Key},",
+				"          {Stock Item Key}",
+				"     )) ~> factPurchase"
 			]
 		}
 	}
