@@ -3,165 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "CopyToPurchaseODS",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "LookupInputTables",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('LookupInputTables').output.value",
-						"type": "Expression"
-					},
-					"activities": [
-						{
-							"name": "CopyToODS",
-							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "TruncateStaging",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "AzureSqlSource",
-									"additionalColumns": [
-										{
-											"name": "IngestTime",
-											"value": {
-												"value": "@convertTimeZone(utcNow(),'UTC','Eastern Standard Time')",
-												"type": "Expression"
-											}
-										}
-									],
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
-								},
-								"sink": {
-									"type": "AzureSqlSink",
-									"writeBehavior": "insert",
-									"sqlWriterUseTableLock": false,
-									"tableOption": "autoCreate",
-									"disableMetricsCollection": false
-								},
-								"enableStaging": false,
-								"enableSkipIncompatibleRow": true,
-								"logSettings": {
-									"enableCopyActivityLog": true,
-									"copyActivityLogSettings": {
-										"logLevel": "Warning",
-										"enableReliableLogging": false
-									},
-									"logLocationSettings": {
-										"linkedServiceName": {
-											"referenceName": "incompatibleDataWhileCopy",
-											"type": "LinkedServiceReference"
-										}
-									}
-								},
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "PurchaseTabs",
-									"type": "DatasetReference",
-									"parameters": {
-										"schema": {
-											"value": "@item().table_schema",
-											"type": "Expression"
-										},
-										"table": {
-											"value": "@item().table_name",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "CopyToODSOutput",
-									"type": "DatasetReference",
-									"parameters": {
-										"schema": {
-											"value": "@item().table_schema",
-											"type": "Expression"
-										},
-										"table": {
-											"value": "@item().table_name",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"name": "TruncateStaging",
-							"type": "Lookup",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": "DECLARE @sql NVARCHAR(max)=''\n\nSELECT @sql += ' Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nExec Sp_executesql @sql\n\nSelect * from INFORMATION_SCHEMA.TABLES",
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "CopyToODSOutput",
-									"type": "DatasetReference",
-									"parameters": {
-										"schema": {
-											"value": "@item().table_schema",
-											"type": "Expression"
-										},
-										"table": {
-											"value": "@item().table_name",
-											"type": "Expression"
-										}
-									}
-								}
-							}
-						}
-					]
-				}
-			},
-			{
-				"name": "LookupInputTables",
-				"type": "Lookup",
+				"name": "SCD Type 2",
+				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
-					"timeout": "7.00:00:00",
+					"timeout": "1.00:00:00",
 					"retry": 0,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
@@ -169,20 +15,31 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": "SELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing' \n    or table_name = 'StockItems' \n    or table_name = 'PackageTypes'\n    or table_name = 'TransactionTypes'\n    or table_name = 'PaymentMethods'\n    or table_name = 'People'",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
+					"dataflow": {
+						"referenceName": "SCD Type 2",
+						"type": "DataFlowReference"
 					},
-					"dataset": {
-						"referenceName": "randomWWITab",
-						"type": "DatasetReference"
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
 					},
-					"firstRowOnly": false
+					"traceLevel": "Fine"
 				}
 			}
 		],
+		"variables": {
+			"integrationTablist": {
+				"type": "Array",
+				"defaultValue": [
+					"Suppliers",
+					"Purchase",
+					"Transactions",
+					"TransactionTypes",
+					"PaymentMethods",
+					"StockItems"
+				]
+			}
+		},
 		"annotations": []
 	}
 }
