@@ -1,0 +1,46 @@
+{
+	"name": "dimTransactionTypes",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PurchaseDW",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Transaction Type Key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WWI Transaction Type ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Transaction Type",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Valid From",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "Valid To",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "Lineage Key",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "Dimension",
+			"table": "Transaction Type"
+		}
+	}
+}

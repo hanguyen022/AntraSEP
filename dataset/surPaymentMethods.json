@@ -1,0 +1,16 @@
+{
+	"name": "surPaymentMethods",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PurchaseODS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "Application",
+			"table": "Surrogate_PaymentMethods"
+		}
+	}
+}

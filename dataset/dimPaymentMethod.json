@@ -1,0 +1,46 @@
+{
+	"name": "dimPaymentMethod",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PurchaseDW",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Payment Method Key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WWI Payment Method ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Payment Method",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Valid From",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "Valid To",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "Lineage Key",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "Dimension",
+			"table": "Payment Method"
+		}
+	}
+}

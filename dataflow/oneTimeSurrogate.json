@@ -16,14 +16,14 @@
 						"referenceName": "odsSupplier",
 						"type": "DatasetReference"
 					},
-					"name": "surSupplier"
+					"name": "odsSupplier"
 				},
 				{
 					"dataset": {
 						"referenceName": "odsPOLines",
 						"type": "DatasetReference"
 					},
-					"name": "surPurchase"
+					"name": "odsPurchase"
 				},
 				{
 					"dataset": {
@@ -37,7 +37,7 @@
 						"referenceName": "odsTransaction",
 						"type": "DatasetReference"
 					},
-					"name": "surTransactions"
+					"name": "odsTransactions"
 				},
 				{
 					"dataset": {
@@ -45,6 +45,48 @@
 						"type": "DatasetReference"
 					},
 					"name": "factTran"
+				},
+				{
+					"dataset": {
+						"referenceName": "odsStockItems",
+						"type": "DatasetReference"
+					},
+					"name": "odsStockItems"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimStockItem",
+						"type": "DatasetReference"
+					},
+					"name": "dimStockItem"
+				},
+				{
+					"dataset": {
+						"referenceName": "odsTransactionTypes",
+						"type": "DatasetReference"
+					},
+					"name": "odsTransactionTypes"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimTransactionTypes",
+						"type": "DatasetReference"
+					},
+					"name": "dimTransactionTypes"
+				},
+				{
+					"dataset": {
+						"referenceName": "odsPaymentType",
+						"type": "DatasetReference"
+					},
+					"name": "odsPaymentMethod"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimPaymentMethod",
+						"type": "DatasetReference"
+					},
+					"name": "dimPaymentMethod"
 				}
 			],
 			"sinks": [
@@ -53,7 +95,7 @@
 						"referenceName": "surSupplier",
 						"type": "DatasetReference"
 					},
-					"name": "updatedSurSup"
+					"name": "ODSupdatedSurSup"
 				},
 				{
 					"dataset": {
@@ -68,6 +110,27 @@
 						"type": "DatasetReference"
 					},
 					"name": "sink3"
+				},
+				{
+					"dataset": {
+						"referenceName": "ItegrationStockItems",
+						"type": "DatasetReference"
+					},
+					"name": "sink4"
+				},
+				{
+					"dataset": {
+						"referenceName": "surTransactionType",
+						"type": "DatasetReference"
+					},
+					"name": "sink5"
+				},
+				{
+					"dataset": {
+						"referenceName": "surPaymentMethods",
+						"type": "DatasetReference"
+					},
+					"name": "sink6"
 				}
 			],
 			"transformations": [
@@ -78,25 +141,16 @@
 					"name": "UpdateSurrogateKey"
 				},
 				{
-					"name": "select1"
-				},
-				{
 					"name": "join1"
 				},
 				{
 					"name": "UpdateSurrogate"
 				},
 				{
-					"name": "delMaxVal"
-				},
-				{
 					"name": "join2"
 				},
 				{
 					"name": "updateSurrogateK"
-				},
-				{
-					"name": "select2"
 				},
 				{
 					"name": "surrogateKey2"
@@ -106,6 +160,33 @@
 				},
 				{
 					"name": "surrogateKey3"
+				},
+				{
+					"name": "surrogateKey4"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "updateSurKey"
+				},
+				{
+					"name": "surrogateKey5"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "surrogateKey6"
+				},
+				{
+					"name": "join5"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -153,7 +234,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> surSupplier",
+				"     format: 'table') ~> odsSupplier",
 				"source(output(",
 				"          SurKey as long,",
 				"          PurchaseOrderLineID as integer,",
@@ -173,7 +254,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> surPurchase",
+				"     format: 'table') ~> odsPurchase",
 				"source(output(",
 				"          maxVal as long",
 				"     ),",
@@ -203,7 +284,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> surTransactions",
+				"     format: 'table') ~> odsTransactions",
 				"source(output(",
 				"          MaxVal as long",
 				"     ),",
@@ -212,108 +293,141 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select max([Transaction Key]) as MaxVal\\nfrom [Fact].[Transaction]',",
 				"     format: 'query') ~> factTran",
+				"source(output(",
+				"          StockItemID as integer,",
+				"          StockItemName as string,",
+				"          SupplierID as integer,",
+				"          ColorID as integer,",
+				"          UnitPackageID as integer,",
+				"          OuterPackageID as integer,",
+				"          Brand as string,",
+				"          Size as string,",
+				"          LeadTimeDays as integer,",
+				"          QuantityPerOuter as integer,",
+				"          IsChillerStock as boolean,",
+				"          Barcode as string,",
+				"          TaxRate as decimal(18,3),",
+				"          UnitPrice as decimal(18,2),",
+				"          RecommendedRetailPrice as decimal(18,2),",
+				"          TypicalWeightPerUnit as decimal(18,3),",
+				"          MarketingComments as string,",
+				"          InternalComments as string,",
+				"          Photo as binary,",
+				"          CustomFields as string,",
+				"          Tags as string,",
+				"          SearchDetails as string,",
+				"          LastEditedBy as integer,",
+				"          ValidFrom as timestamp,",
+				"          ValidTo as timestamp,",
+				"          IngestTime as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> odsStockItems",
+				"source(output(",
+				"          MaxVal as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max([Stock Item Key]) as MaxVal\\nfrom [Dimension].[Stock Item]',",
+				"     format: 'query') ~> dimStockItem",
+				"source(output(",
+				"          TransactionTypeID as integer,",
+				"          TransactionTypeName as string,",
+				"          LastEditedBy as integer,",
+				"          ValidFrom as timestamp,",
+				"          ValidTo as timestamp,",
+				"          IngestTime as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> odsTransactionTypes",
+				"source(output(",
+				"          MaxVal as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max([Transaction Type Key]) as MaxVal\\nFrom [Dimension].[Transaction Type]',",
+				"     format: 'query') ~> dimTransactionTypes",
+				"source(output(",
+				"          PaymentMethodID as integer,",
+				"          PaymentMethodName as string,",
+				"          LastEditedBy as integer,",
+				"          ValidFrom as timestamp,",
+				"          ValidTo as timestamp,",
+				"          IngestTime as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> odsPaymentMethod",
+				"source(output(",
+				"          maxVal as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max([Payment Method Key]) as maxVal\\nFrom [Dimension].[Payment Method]',",
+				"     format: 'query') ~> dimPaymentMethod",
 				"surrogateKey1, DimSup join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> joinMaxVal",
 				"joinMaxVal derive(SurKey = SurKey + maxVal) ~> UpdateSurrogateKey",
-				"UpdateSurrogateKey select(mapColumn(",
-				"          SupplierID,",
-				"          SupplierName,",
-				"          SupplierCategoryID,",
-				"          PrimaryContactPersonID,",
-				"          AlternateContactPersonID,",
-				"          DeliveryMethodID,",
-				"          DeliveryCityID,",
-				"          PostalCityID,",
-				"          SupplierReference,",
-				"          BankAccountName,",
-				"          BankAccountBranch,",
-				"          BankAccountCode,",
-				"          BankAccountNumber,",
-				"          BankInternationalCode,",
-				"          SurKey,",
-				"          PaymentDays,",
-				"          InternalComments,",
-				"          PhoneNumber,",
-				"          FaxNumber,",
-				"          WebsiteURL,",
-				"          DeliveryAddressLine1,",
-				"          DeliveryAddressLine2,",
-				"          DeliveryPostalCode,",
-				"          DeliveryLocation,",
-				"          PostalAddressLine1,",
-				"          PostalAddressLine2,",
-				"          PostalPostalCode,",
-				"          LastEditedBy,",
-				"          ValidFrom,",
-				"          ValidTo,",
-				"          IngestTime",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
 				"surrogateKey2, factPurchase join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
 				"join1 derive(SurKey = maxVal+SurKey) ~> UpdateSurrogate",
-				"UpdateSurrogate select(mapColumn(",
-				"          SurKey,",
-				"          PurchaseOrderLineID,",
-				"          PurchaseOrderID,",
-				"          StockItemID,",
-				"          OrderedOuters,",
-				"          Description,",
-				"          ReceivedOuters,",
-				"          PackageTypeID,",
-				"          ExpectedUnitPricePerOuter,",
-				"          LastReceiptDate,",
-				"          IsOrderLineFinalized,",
-				"          LastEditedBy,",
-				"          LastEditedWhen,",
-				"          IngestTime",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> delMaxVal",
 				"surrogateKey3, factTran join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
 				"join2 derive(SurKey = SurKey + MaxVal) ~> updateSurrogateK",
-				"updateSurrogateK select(mapColumn(",
-				"          SurKey,",
-				"          SupplierTransactionID,",
-				"          SupplierID,",
-				"          TransactionTypeID,",
-				"          PurchaseOrderID,",
-				"          PaymentMethodID,",
-				"          SupplierInvoiceNumber,",
-				"          TransactionDate,",
-				"          AmountExcludingTax,",
-				"          TaxAmount,",
-				"          TransactionAmount,",
-				"          OutstandingBalance,",
-				"          FinalizationDate,",
-				"          IsFinalized,",
-				"          LastEditedBy,",
-				"          LastEditedWhen,",
-				"          IngestTime",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
-				"surPurchase keyGenerate(output(SurKey as long),",
+				"odsPurchase keyGenerate(output(SurKey as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey2",
-				"surSupplier keyGenerate(output(SurKey as long),",
+				"odsSupplier keyGenerate(output(SurKey as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
-				"surTransactions keyGenerate(output(SurKey as long),",
+				"odsTransactions keyGenerate(output(SurKey as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey3",
-				"select1 sink(allowSchemaDrift: true,",
+				"odsStockItems keyGenerate(output(SurKey as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey4",
+				"surrogateKey4, dimStockItem join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3 derive(SurKey = SurKey + MaxVal) ~> updateSurKey",
+				"odsTransactionTypes keyGenerate(output(SurKey as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey5",
+				"surrogateKey5, dimTransactionTypes join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4 derive(MaxVal = MaxVal + SurKey) ~> derivedColumn1",
+				"odsPaymentMethod keyGenerate(output(SurKey as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey6",
+				"surrogateKey6, dimPaymentMethod join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
+				"join5 derive(maxVal = maxVal + SurKey) ~> derivedColumn2",
+				"UpdateSurrogateKey sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          SupplierID as integer,",
@@ -388,8 +502,8 @@
 				"          ValidFrom,",
 				"          ValidTo,",
 				"          IngestTime",
-				"     )) ~> updatedSurSup",
-				"delMaxVal sink(allowSchemaDrift: true,",
+				"     )) ~> ODSupdatedSurSup",
+				"UpdateSurrogate sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          PurchaseOrderLineID as integer,",
@@ -432,7 +546,7 @@
 				"          LastEditedWhen,",
 				"          IngestTime",
 				"     )) ~> sink2",
-				"select2 sink(allowSchemaDrift: true,",
+				"updateSurrogateK sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          SupplierTransactionID as integer,",
@@ -480,7 +594,87 @@
 				"          LastEditedBy,",
 				"          LastEditedWhen,",
 				"          IngestTime",
-				"     )) ~> sink3"
+				"     )) ~> sink3",
+				"updateSurKey sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     recreate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          SurKey,",
+				"          StockItemID,",
+				"          StockItemName,",
+				"          SupplierID,",
+				"          ColorID,",
+				"          UnitPackageID,",
+				"          OuterPackageID,",
+				"          Brand,",
+				"          Size,",
+				"          LeadTimeDays,",
+				"          QuantityPerOuter,",
+				"          IsChillerStock,",
+				"          Barcode,",
+				"          TaxRate,",
+				"          UnitPrice,",
+				"          RecommendedRetailPrice,",
+				"          TypicalWeightPerUnit,",
+				"          MarketingComments,",
+				"          InternalComments,",
+				"          Photo,",
+				"          CustomFields,",
+				"          Tags,",
+				"          SearchDetails,",
+				"          LastEditedBy,",
+				"          ValidFrom,",
+				"          ValidTo,",
+				"          IngestTime",
+				"     )) ~> sink4",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     recreate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          SurKey,",
+				"          TransactionTypeID,",
+				"          TransactionTypeName,",
+				"          LastEditedBy,",
+				"          ValidFrom,",
+				"          ValidTo,",
+				"          IngestTime",
+				"     )) ~> sink5",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     recreate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          SurKey,",
+				"          PaymentMethodID,",
+				"          PaymentMethodName,",
+				"          LastEditedBy,",
+				"          ValidFrom,",
+				"          ValidTo,",
+				"          IngestTime",
+				"     )) ~> sink6"
 			]
 		}
 	}
