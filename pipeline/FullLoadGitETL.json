@@ -387,8 +387,355 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "CopyDWtoADLS",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "fact changing fact",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.cw_items",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy_tpy",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "@{item().source.schema}.@{item().source.table}"
+								},
+								{
+									"name": "Destination",
+									"value": "wwidw/sqlwwiDW/@{item().destination.fileName}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"validateDataConsistency": false
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceDataset_tpy",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_schema": "@item().source.schema",
+										"cw_table": "@item().source.table"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DestinationDataset_tpy",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_fileName": "@item().destination.fileName"
+									}
+								}
+							]
+						}
+					]
+				}
 			}
 		],
+		"parameters": {
+			"cw_items": {
+				"type": "array",
+				"defaultValue": [
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "City"
+						},
+						"destination": {
+							"fileName": "DimensionCitywwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Customer"
+						},
+						"destination": {
+							"fileName": "DimensionCustomerwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Date"
+						},
+						"destination": {
+							"fileName": "DimensionDatewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Employee"
+						},
+						"destination": {
+							"fileName": "DimensionEmployeewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Payment Method"
+						},
+						"destination": {
+							"fileName": "DimensionPayment%20MethodwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Stock Item"
+						},
+						"destination": {
+							"fileName": "DimensionStock%20ItemwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Supplier"
+						},
+						"destination": {
+							"fileName": "DimensionSupplierwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Transaction Type"
+						},
+						"destination": {
+							"fileName": "DimensionTransaction%20TypewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Movement"
+						},
+						"destination": {
+							"fileName": "FactMovementwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Order"
+						},
+						"destination": {
+							"fileName": "FactOrderwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Purchase"
+						},
+						"destination": {
+							"fileName": "FactPurchasewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Sale"
+						},
+						"destination": {
+							"fileName": "FactSalewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Stock Holding"
+						},
+						"destination": {
+							"fileName": "FactStock%20HoldingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Transaction"
+						},
+						"destination": {
+							"fileName": "FactTransactionwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "City_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationCity_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Customer_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationCustomer_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Employee_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationEmployee_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "ETL Cutoff"
+						},
+						"destination": {
+							"fileName": "IntegrationETL%20CutoffwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Lineage"
+						},
+						"destination": {
+							"fileName": "IntegrationLineagewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Movement_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationMovement_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Order_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationOrder_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "PaymentMethod_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationPaymentMethod_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Purchase_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationPurchase_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Sale_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationSale_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "StockHolding_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationStockHolding_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "StockItem_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationStockItem_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Supplier_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationSupplier_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Transaction_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationTransaction_StagingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "TransactionType_Staging"
+						},
+						"destination": {
+							"fileName": "IntegrationTransactionType_StagingwwiDW"
+						}
+					}
+				]
+			}
+		},
 		"variables": {
 			"integrationTabList": {
 				"type": "Array",
