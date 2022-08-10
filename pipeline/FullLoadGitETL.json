@@ -387,6 +387,38 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "formatForParquet",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "fact changing fact",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "-- DELETE WHITE SPACE IN ALL COLUMNS\r\n\r\nSELECT 'EXEC SP_RENAME ''' + B.NAME + '.' + A.NAME\r\n+ ''', ''' + REPLACE(A.NAME, ' ', '')\r\n+ ''', ''COLUMN'''\r\nFROM   sys.columns A\r\nINNER JOIN sys.tables B\r\nON A.OBJECT_ID = B.OBJECT_ID\r\nAND OBJECTPROPERTY(b.OBJECT_ID, N'IsUserTable') = 1\r\nWHERE  system_type_id IN (SELECT system_type_id\r\nFROM   sys.types)\r\nAND CHARINDEX(' ', a.NAME) <> 0\r\n\r\n-- CHANGE Geography DATATYPE TO String\r\n\r\nALTER TABLE Dimension.City\r\nALTER COLUMN Location str;\r\n\r\nSelect * from Dimension.City",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "RandomDWTable",
+						"type": "DatasetReference"
+					}
+				}
 			}
 		],
 		"parameters": {
