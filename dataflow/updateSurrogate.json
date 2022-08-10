@@ -8,10 +8,6 @@
 		"typeProperties": {
 			"sources": [
 				{
-					"dataset": {
-						"referenceName": "dimSuppliers",
-						"type": "DatasetReference"
-					},
 					"name": "DimSup"
 				},
 				{
@@ -107,10 +103,7 @@
 				"          maxVal as integer",
 				"     ),",
 				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'Select max([Supplier Key]) as maxVal\\nFROM [Dimension].[Supplier]',",
-				"     format: 'query') ~> DimSup",
+				"     validateSchema: false) ~> DimSup",
 				"source(output(",
 				"          SupplierID as integer,",
 				"          SupplierName as string,",
