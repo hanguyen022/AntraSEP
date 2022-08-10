@@ -236,7 +236,6 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> odsSupplier",
 				"source(output(",
-				"          SurKey as long,",
 				"          PurchaseOrderLineID as integer,",
 				"          PurchaseOrderID as integer,",
 				"          StockItemID as integer,",
