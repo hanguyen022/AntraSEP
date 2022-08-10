@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ForEach_f0s",
+				"name": "copyToADLS",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
