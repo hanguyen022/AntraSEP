@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ForEach_46b",
+				"name": "CopyDWtoADLS",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
