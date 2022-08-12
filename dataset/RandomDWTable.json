@@ -12,12 +12,12 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "City Key",
+				"name": "CityKey",
 				"type": "int",
 				"precision": 10
 			},
 			{
-				"name": "WWI City ID",
+				"name": "WWICityID",
 				"type": "int",
 				"precision": 10
 			},
@@ -26,7 +26,7 @@
 				"type": "nvarchar"
 			},
 			{
-				"name": "State Province",
+				"name": "StateProvince",
 				"type": "nvarchar"
 			},
 			{
@@ -38,7 +38,7 @@
 				"type": "nvarchar"
 			},
 			{
-				"name": "Sales Territory",
+				"name": "SalesTerritory",
 				"type": "nvarchar"
 			},
 			{
@@ -54,22 +54,22 @@
 				"type": "geography"
 			},
 			{
-				"name": "Latest Recorded Population",
+				"name": "LatestRecordedPopulation",
 				"type": "bigint",
 				"precision": 19
 			},
 			{
-				"name": "Valid From",
+				"name": "ValidFrom",
 				"type": "datetime2",
 				"scale": 7
 			},
 			{
-				"name": "Valid To",
+				"name": "ValidTo",
 				"type": "datetime2",
 				"scale": 7
 			},
 			{
-				"name": "Lineage Key",
+				"name": "LineageKey",
 				"type": "int",
 				"precision": 10
 			}
