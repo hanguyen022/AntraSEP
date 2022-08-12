@@ -507,15 +507,6 @@
 					{
 						"source": {
 							"schema": "Dimension",
-							"table": "City"
-						},
-						"destination": {
-							"fileName": "DimensionCitywwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Dimension",
 							"table": "Customer"
 						},
 						"destination": {
@@ -543,19 +534,19 @@
 					{
 						"source": {
 							"schema": "Dimension",
-							"table": "Payment Method"
+							"table": "PaymentMethod"
 						},
 						"destination": {
-							"fileName": "DimensionPayment%20MethodwwiDW"
+							"fileName": "DimensionPaymentMethodwwiDW"
 						}
 					},
 					{
 						"source": {
 							"schema": "Dimension",
-							"table": "Stock Item"
+							"table": "StockItem"
 						},
 						"destination": {
-							"fileName": "DimensionStock%20ItemwwiDW"
+							"fileName": "DimensionStockItemwwiDW"
 						}
 					},
 					{
@@ -570,10 +561,10 @@
 					{
 						"source": {
 							"schema": "Dimension",
-							"table": "Transaction Type"
+							"table": "TransactionType"
 						},
 						"destination": {
-							"fileName": "DimensionTransaction%20TypewwiDW"
+							"fileName": "DimensionTransactionTypewwiDW"
 						}
 					},
 					{
@@ -615,10 +606,10 @@
 					{
 						"source": {
 							"schema": "Fact",
-							"table": "Stock Holding"
+							"table": "StockHolding"
 						},
 						"destination": {
-							"fileName": "FactStock%20HoldingwwiDW"
+							"fileName": "FactStockHoldingwwiDW"
 						}
 					},
 					{
@@ -633,37 +624,10 @@
 					{
 						"source": {
 							"schema": "Integration",
-							"table": "City_Staging"
+							"table": "ETLCutoff"
 						},
 						"destination": {
-							"fileName": "IntegrationCity_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "Customer_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationCustomer_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "Employee_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationEmployee_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "ETL Cutoff"
-						},
-						"destination": {
-							"fileName": "IntegrationETL%20CutoffwwiDW"
+							"fileName": "IntegrationETLCutoffwwiDW"
 						}
 					},
 					{
@@ -673,96 +637,6 @@
 						},
 						"destination": {
 							"fileName": "IntegrationLineagewwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "Movement_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationMovement_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "Order_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationOrder_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "PaymentMethod_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationPaymentMethod_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "Purchase_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationPurchase_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "Sale_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationSale_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "StockHolding_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationStockHolding_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "StockItem_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationStockItem_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "Supplier_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationSupplier_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "Transaction_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationTransaction_StagingwwiDW"
-						}
-					},
-					{
-						"source": {
-							"schema": "Integration",
-							"table": "TransactionType_Staging"
-						},
-						"destination": {
-							"fileName": "IntegrationTransactionType_StagingwwiDW"
 						}
 					}
 				]
