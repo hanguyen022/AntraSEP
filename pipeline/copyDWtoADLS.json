@@ -1,0 +1,222 @@
+{
+	"name": "copyDWtoADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach_46b",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.cw_items",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy_46b",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "@{item().source.schema}.@{item().source.table}"
+								},
+								{
+									"name": "Destination",
+									"value": "wwidw/sqlwwiDW/@{item().destination.fileName}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"validateDataConsistency": false
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceDataset_46b",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_schema": "@item().source.schema",
+										"cw_table": "@item().source.table"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DestinationDataset_46b",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_fileName": "@item().destination.fileName"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"cw_items": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Customer"
+						},
+						"destination": {
+							"fileName": "DimensionCustomerwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Date"
+						},
+						"destination": {
+							"fileName": "DimensionDatewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Employee"
+						},
+						"destination": {
+							"fileName": "DimensionEmployeewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "PaymentMethod"
+						},
+						"destination": {
+							"fileName": "DimensionPaymentMethodwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "StockItem"
+						},
+						"destination": {
+							"fileName": "DimensionStockItemwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "Supplier"
+						},
+						"destination": {
+							"fileName": "DimensionSupplierwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Dimension",
+							"table": "TransactionType"
+						},
+						"destination": {
+							"fileName": "DimensionTransactionTypewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Movement"
+						},
+						"destination": {
+							"fileName": "FactMovementwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Order"
+						},
+						"destination": {
+							"fileName": "FactOrderwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Purchase"
+						},
+						"destination": {
+							"fileName": "FactPurchasewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Sale"
+						},
+						"destination": {
+							"fileName": "FactSalewwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "StockHolding"
+						},
+						"destination": {
+							"fileName": "FactStockHoldingwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Fact",
+							"table": "Transaction"
+						},
+						"destination": {
+							"fileName": "FactTransactionwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "ETLCutoff"
+						},
+						"destination": {
+							"fileName": "IntegrationETLCutoffwwiDW"
+						}
+					},
+					{
+						"source": {
+							"schema": "Integration",
+							"table": "Lineage"
+						},
+						"destination": {
+							"fileName": "IntegrationLineagewwiDW"
+						}
+					}
+				]
+			}
+		},
+		"annotations": []
+	}
+}
