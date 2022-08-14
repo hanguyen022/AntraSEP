@@ -1,0 +1,112 @@
+{
+	"name": "saveParquetinADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "formatForParquet",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "-- DELETE WHITE SPACE IN ALL TABLE NAMES\r\n\r\ndeclare @schema nvarchar(128)\r\ndeclare @table nvarchar(128)\r\ndeclare @cmd nvarchar(500)\r\n\r\ndeclare AllTables cursor for\r\nselect table_schema, table_name from information_schema.tables\r\n   where table_type = 'base table'\r\n\r\nopen AllTables\r\nfetch next from AllTables into @schema, @table\r\nwhile @@fetch_status = 0\r\nbegin\r\n  set @cmd = N'exec sp_rename ' + QUOTENAME(@schema + '.' + @table) + N',' + QUOTENAME(REPLACE(@table, ' ', ''))\r\n  EXEC sp_executeSQL @cmd\r\n  fetch next from AllTables into @schema, @table\r\nend\r\n\r\nclose AllTables\r\ndeallocate AllTables\r\n\r\n\r\n-- DELETE WHITE SPACE IN ALL COLUMNS\r\ndeclare @cmd2 nvarchar(500)\r\ndeclare @column nvarchar(200)\r\n\r\ndeclare AllCols cursor for\r\nselect table_schema, table_name, column_name from information_schema.columns\r\nwhere table_schema != 'sys'\r\n\r\nopen AllCols\r\nfetch next from AllCols into @schema, @table, @column\r\nwhile @@fetch_status = 0\r\nbegin\r\n  set @cmd2 = N'exec sp_rename ' + QUOTENAME(@schema + '.' + @table + '.' + @column) + N',' + QUOTENAME(REPLACE(@column, ' ', ''))\r\n  EXEC sp_executeSQL @cmd2\r\n  fetch next from AllCols into @schema, @table, @column\r\nend\r\n\r\nclose AllCols\r\ndeallocate AllCols\r\n\r\n-- CHANGE Geography DATATYPE TO String\r\n\r\n--ALTER TABLE Dimension.City\r\n--ADD Locations as Location.ToString()\r\n\r\n--ALTER TABLE [Dimension].[City]\r\n--DROP COLUMN Location               --> Cannot drop as Locations is built on this column\r\n\r\nSelect * from Dimension.Supplier ",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "RandomDWTable",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CopyDWtoADLS",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "formatForParquet",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.cw_items",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy_46b",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "@{item().source.schema}.@{item().source.table}"
+								},
+								{
+									"name": "Destination",
+									"value": "wwidw/sqlwwiDW/@{item().destination.fileName}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"validateDataConsistency": false
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceDataset_46b",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_schema": "@item().source.schema",
+										"cw_table": "@item().source.table"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DestinationDataset_46b",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_fileName": "@item().destination.fileName"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}
