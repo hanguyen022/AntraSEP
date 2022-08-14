@@ -25,6 +25,7 @@
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
 				"source1 sink(allowSchemaDrift: true,",
@@ -44,7 +45,23 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          CityKey,",
+				"          WWICityID,",
+				"          City,",
+				"          StateProvince,",
+				"          Country,",
+				"          Continent,",
+				"          SalesTerritory,",
+				"          Region,",
+				"          Subregion,",
+				"          Location,",
+				"          LatestRecordedPopulation,",
+				"          ValidFrom,",
+				"          ValidTo,",
+				"          LineageKey",
+				"     )) ~> sink1"
 			]
 		}
 	}
