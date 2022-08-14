@@ -328,6 +328,9 @@
 				}
 			}
 		],
+		"folder": {
+			"name": "FullLoadTriggers"
+		},
 		"annotations": []
 	}
 }
