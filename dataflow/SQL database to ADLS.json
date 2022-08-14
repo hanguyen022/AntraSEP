@@ -45,23 +45,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     mapColumn(",
-				"          CityKey,",
-				"          WWICityID,",
-				"          City,",
-				"          StateProvince,",
-				"          Country,",
-				"          Continent,",
-				"          SalesTerritory,",
-				"          Region,",
-				"          Subregion,",
-				"          Location,",
-				"          LatestRecordedPopulation,",
-				"          ValidFrom,",
-				"          ValidTo,",
-				"          LineageKey",
-				"     )) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
