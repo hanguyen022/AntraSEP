@@ -109,6 +109,9 @@
 				}
 			}
 		],
+		"folder": {
+			"name": "FullLoadTriggers"
+		},
 		"annotations": []
 	}
 }
