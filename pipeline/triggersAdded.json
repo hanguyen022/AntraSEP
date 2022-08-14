@@ -1,0 +1,114 @@
+{
+	"name": "triggersAdded",
+	"properties": {
+		"activities": [
+			{
+				"name": "CopytoODS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "LookupInputTables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CopytoODS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "LookupInputTables",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing' \n    or table_name = 'StockItems' \n    or table_name = 'PackageTypes'\n    or table_name = 'TransactionTypes'\n    or table_name = 'PaymentMethods'\n    or table_name = 'People'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "randomWWITab",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "CoptytoIntegration",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CopytoODS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CoptytoIntegration",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "loadDimFact",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CoptytoIntegration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "loadDimFact",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "saveParquetinADLS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "loadDimFact",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "saveParquetinADLS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}
