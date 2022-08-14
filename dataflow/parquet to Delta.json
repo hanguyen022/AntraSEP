@@ -1,12 +1,12 @@
 {
-	"name": "dataflow1",
+	"name": "parquet to Delta",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "RandomDWTable",
+						"referenceName": "DestinationDataset_46b",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -14,104 +14,41 @@
 			],
 			"sinks": [
 				{
-					"dataset": {
-						"referenceName": "RandomDWTable",
-						"type": "DatasetReference"
+					"linkedService": {
+						"referenceName": "ADLSwwi",
+						"type": "LinkedServiceReference"
 					},
-					"name": "sink1"
+					"name": "deltafiles",
+					"rejectedDataLinkedService": {
+						"referenceName": "incompatibleDataWhileCopy",
+						"type": "LinkedServiceReference"
+					}
 				}
 			],
-			"transformations": [
-				{
-					"name": "select1"
-				},
-				{
-					"name": "alterRow1"
-				}
-			],
+			"transformations": [],
 			"scriptLines": [
-				"source(output(",
-				"          CityKey as integer,",
-				"          WWICityID as integer,",
-				"          City as string,",
-				"          StateProvince as string,",
-				"          Country as string,",
-				"          Continent as string,",
-				"          SalesTerritory as string,",
-				"          Region as string,",
-				"          Subregion as string,",
-				"          Location as binary,",
-				"          LatestRecordedPopulation as long,",
-				"          ValidFrom as timestamp,",
-				"          ValidTo as timestamp,",
-				"          LineageKey as integer",
-				"     ),",
-				"     allowSchemaDrift: true,",
+				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source1",
-				"source1 select(mapColumn(",
-				"          CityKey,",
-				"          WWICityID,",
-				"          City,",
-				"          StateProvince,",
-				"          Country,",
-				"          Continent,",
-				"          SalesTerritory,",
-				"          Region,",
-				"          Subregion,",
-				"          Location,",
-				"          LatestRecordedPopulation,",
-				"          ValidFrom,",
-				"          ValidTo,",
-				"          LineageKey",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 alterRow(updateIf(1==1)) ~> alterRow1",
-				"alterRow1 sink(allowSchemaDrift: true,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> source1",
+				"source1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          CityKey as integer,",
-				"          WWICityID as integer,",
-				"          City as string,",
-				"          StateProvince as string,",
-				"          Country as string,",
-				"          Continent as string,",
-				"          SalesTerritory as string,",
-				"          Region as string,",
-				"          Subregion as string,",
-				"          Location as binary,",
-				"          LatestRecordedPopulation as long,",
-				"          ValidFrom as timestamp,",
-				"          ValidTo as timestamp,",
-				"          LineageKey as integer",
-				"     ),",
+				"     format: 'delta',",
+				"     fileSystem: 'wwidw',",
+				"     folderPath: 'adfDeltafile',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
 				"     deletable:false,",
 				"     insertable:true,",
 				"     updateable:false,",
 				"     upsertable:false,",
-				"     recreate:true,",
-				"     format: 'table',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError',",
-				"     mapColumn(",
-				"          CityKey,",
-				"          WWICityID,",
-				"          City,",
-				"          StateProvince,",
-				"          Country,",
-				"          Continent,",
-				"          SalesTerritory,",
-				"          Region,",
-				"          Subregion,",
-				"          Location,",
-				"          LatestRecordedPopulation,",
-				"          ValidFrom,",
-				"          ValidTo,",
-				"          LineageKey",
-				"     )) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> deltafiles"
 			]
 		}
 	}
