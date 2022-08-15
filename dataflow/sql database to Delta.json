@@ -1,5 +1,5 @@
 {
-	"name": "azure dtb to ADLS hardcode",
+	"name": "sql database to Delta",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
