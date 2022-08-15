@@ -20,7 +20,15 @@
 			"retryPolicy": {
 				"intervalInSeconds": 30
 			},
-			"dependsOn": []
+			"dependsOn": [
+				{
+					"type": "TumblingWindowTriggerDependencyReference",
+					"referenceTrigger": {
+						"referenceName": "copytoIntegration",
+						"type": "TriggerReference"
+					}
+				}
+			]
 		}
 	}
 }
