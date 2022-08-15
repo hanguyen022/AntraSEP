@@ -34,7 +34,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataflow": {
-									"referenceName": "azure dtb to ADLS hardcode",
+									"referenceName": "sql database to Delta",
 									"type": "DataFlowReference",
 									"parameters": {
 										"schema": {
