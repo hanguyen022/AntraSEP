@@ -110,7 +110,7 @@
 			}
 		],
 		"folder": {
-			"name": "FullLoadTriggers"
+			"name": "masterPipline"
 		},
 		"annotations": []
 	}
