@@ -1,5 +1,5 @@
 {
-	"name": "SQL database to ADLS",
+	"name": "SQL database to ADLS - Parameter",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
