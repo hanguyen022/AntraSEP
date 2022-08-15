@@ -24,7 +24,7 @@
 				{
 					"type": "TumblingWindowTriggerDependencyReference",
 					"referenceTrigger": {
-						"referenceName": "copytoIntegration",
+						"referenceName": "loadDimFact",
 						"type": "TriggerReference"
 					}
 				}
