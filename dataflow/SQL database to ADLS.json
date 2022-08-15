@@ -6,10 +6,10 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "RandomDWTable",
+						"referenceName": "wwiDWPara",
 						"type": "DatasetReference"
 					},
-					"name": "dimCity"
+					"name": "DWPara"
 				}
 			],
 			"sinks": [
@@ -23,27 +23,11 @@
 			],
 			"transformations": [],
 			"scriptLines": [
-				"source(output(",
-				"          CityKey as integer,",
-				"          WWICityID as integer,",
-				"          City as string,",
-				"          StateProvince as string,",
-				"          Country as string,",
-				"          Continent as string,",
-				"          SalesTerritory as string,",
-				"          Region as string,",
-				"          Subregion as string,",
-				"          Location as binary,",
-				"          LatestRecordedPopulation as long,",
-				"          ValidFrom as timestamp,",
-				"          ValidTo as timestamp,",
-				"          LineageKey as integer",
-				"     ),",
-				"     allowSchemaDrift: true,",
+				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> dimCity",
-				"dimCity sink(allowSchemaDrift: true,",
+				"     format: 'table') ~> DWPara",
+				"DWPara sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delta',",
 				"     fileSystem: 'wwidw',",
@@ -60,23 +44,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     mapColumn(",
-				"          CityKey,",
-				"          WWICityID,",
-				"          City,",
-				"          StateProvince,",
-				"          Country,",
-				"          Continent,",
-				"          SalesTerritory,",
-				"          Region,",
-				"          Subregion,",
-				"          Location,",
-				"          LatestRecordedPopulation,",
-				"          ValidFrom,",
-				"          ValidTo,",
-				"          LineageKey",
-				"     )) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
