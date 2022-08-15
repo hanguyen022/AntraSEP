@@ -21,7 +21,7 @@
 					},
 					"activities": [
 						{
-							"name": "dataflow1",
+							"name": "azure dtb to ADLS hardcode",
 							"type": "ExecuteDataFlow",
 							"dependsOn": [],
 							"policy": {
@@ -34,18 +34,16 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataflow": {
-									"referenceName": "SQL database to ADLS",
+									"referenceName": "azure dtb to ADLS hardcode",
 									"type": "DataFlowReference",
-									"datasetParameters": {
-										"source1": {
-											"schema": {
-												"value": "@item().table_schema",
-												"type": "Expression"
-											},
-											"table": {
-												"value": "@item().table_name",
-												"type": "Expression"
-											}
+									"parameters": {
+										"schema": {
+											"value": "'@{item().table_schema}'",
+											"type": "Expression"
+										},
+										"table": {
+											"value": "'@{item().table_name}'",
+											"type": "Expression"
 										}
 									}
 								},
@@ -74,7 +72,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "SELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_type = 'BASE TABLE' ",
+						"sqlReaderQuery": "SELECT table_schema, table_name\nFROM information_schema.TABLES \nWHERE table_type = 'BASE TABLE'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
