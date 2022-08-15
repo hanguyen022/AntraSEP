@@ -39,7 +39,7 @@
 				"     format: 'delta',",
 				"     fileSystem: 'wwidw',",
 				"     folderPath: 'adfDeltaOutput',",
-				"     mergeSchema: false,",
+				"     mergeSchema: true,",
 				"     autoCompact: false,",
 				"     optimizedWrite: false,",
 				"     vacuum: 0,",
