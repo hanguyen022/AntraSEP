@@ -164,7 +164,7 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderQuery": "DECLARE @sql NVARCHAR(max)=''\n\nSELECT @sql += ' Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nExec Sp_executesql @sql\n\nSelect * from INFORMATION_SCHEMA.TABLES",
+									"sqlReaderQuery": "DECLARE @sql NVARCHAR(max)\nDeclare @sql2 NVARCHAR(max)\n\nSELECT @sql += ' Truncate table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nFROM   INFORMATION_SCHEMA.TABLES\nWHERE  TABLE_TYPE = 'BASE TABLE'\n\nselect @sql2 += 'Drop table' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '\nfrom INFORMATION_SCHEMA.TABLES\nwhere TABLE_SCHEMA = 'Integration'\n\nExec Sp_executesql @sql\n\nSelect * from INFORMATION_SCHEMA.TABLES",
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
