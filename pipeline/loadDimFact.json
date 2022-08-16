@@ -5,7 +5,14 @@
 			{
 				"name": "SCD Type 2",
 				"type": "ExecuteDataFlow",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "1.00:00:00",
 					"retry": 0,
@@ -55,6 +62,31 @@
 						"computeType": "General"
 					},
 					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "DELETE FROM [Fact].[Purchase]\nWHERE [Purchase Key] > 8367\n\nDELETE FROM [Fact].[Transaction]\nWhere [Transaction Key] > 99585\n\nDelete from [Dimension].[Supplier]\nwhere [Supplier Key] > 27\n\nDelete from [Dimension].[Payment Method]\nwhere [Payment Method Key] > 5\n\nDelete from [Dimension].[Stock Item]\nwhere [Stock Item Key] > 671\n\nDelete from [Dimension].[Transaction Type]\nwhere [Transaction Type Key] > 14\n\nselect * from Dimension.City",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "RandomDWTable",
+						"type": "DatasetReference"
+					}
 				}
 			}
 		],
