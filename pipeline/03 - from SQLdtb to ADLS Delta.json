@@ -1,5 +1,5 @@
 {
-	"name": "from sql datbase to ADLS Delta",
+	"name": "03 - from SQLdtb to ADLS Delta",
 	"properties": {
 		"activities": [
 			{
