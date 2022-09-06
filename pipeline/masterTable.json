@@ -1,0 +1,33 @@
+{
+	"name": "masterTable",
+	"properties": {
+		"activities": [
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "PurchaseDW",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "DECLARE @a TABLE (sch varchar(100), tab varchar(200))\nINSERT INTO @a \nSELECT table_schema, table_name \nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing' \n    or table_name = 'StockItems' \n    or table_name = 'PackageTypes'\n    or table_name = 'TransactionTypes'\n    or table_name = 'PaymentMethods'\n    or table_name = 'People';\n\nDrop table if exists masterTable;\n\nCreate table masterTable (\n    ID int identity(1,1),\n    [Key] nvarchar(200),\n    [Value] nvarchar(max));\n\nInsert into masterTable ([Key],[Value])\nValues ('Purchasing load', @a);\n\nSELECT * from masterTable;"
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}
