@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "Drop table if exists masterTab;\n\nCreate table masterTab (\n    ID int identity(1,1),\n    [Key] varchar(100),\n    [Value] varchar(max)\n);\n\nSELECT table_schema,table_name\nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing' \n    or table_name = 'StockItems' \n    or table_name = 'PackageTypes'\n    or table_name = 'TransactionTypes'\n    or table_name = 'PaymentMethods'\n    or table_name = 'People'\n",
+						"sqlReaderQuery": "Drop table if exists masterTable;\nDrop table if exists masterTab;\n\nCreate table masterTable (\n    ID int identity(1,1),\n    [Key] varchar(100),\n    [Value] varchar(max)\n);\n\nSELECT concat(table_schema,'.',table_name) as t\nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing' \n    or table_name = 'StockItems' \n    or table_name = 'PackageTypes'\n    or table_name = 'TransactionTypes'\n    or table_name = 'PaymentMethods'\n    or table_name = 'People'\n",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -55,12 +55,23 @@
 					"scripts": [
 						{
 							"type": "Query",
-							"text": "Insert into masterTab ([Key], [Value])\nValues ('Purchase_table_load','@{concat(activity('Lookup1').output.value[0].table_schema, '.', activity('Lookup1').output.value[0].table_name}'),\n        ('Purchase_time_load', null)\nSelect * from masterTab "
+							"text": {
+								"value": "Insert into masterTable ([Key], [Value])\nValues ('Purchase_table_load','@{activity('Lookup1').output.value}'),\n        ('Purchase_time_load', null)\nSelect * from masterTable",
+								"type": "Expression"
+							}
 						}
 					]
 				}
 			}
 		],
+		"variables": {
+			"tab": {
+				"type": "Array"
+			},
+			"watermark": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
