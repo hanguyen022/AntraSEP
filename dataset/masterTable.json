@@ -1,0 +1,30 @@
+{
+	"name": "masterTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "wwiStandard",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Key",
+				"type": "varchar"
+			},
+			{
+				"name": "Value",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "masterTable"
+		}
+	}
+}

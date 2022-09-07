@@ -1,0 +1,45 @@
+{
+	"name": "dataflow2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "masterTable",
+						"type": "DatasetReference"
+					},
+					"name": "mastable"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "WatermarkPurchaseTimeLoad"
+				},
+				{
+					"name": "purchaseTableLoad"
+				},
+				{
+					"name": "parse1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ID as integer,",
+				"          Key as string,",
+				"          Value as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> mastable",
+				"mastable filter(and(equals(Key, 'Purchase_time_load'), isNull(Value))) ~> WatermarkPurchaseTimeLoad",
+				"mastable filter(equals(Key,'Purchase_table_load')) ~> purchaseTableLoad",
+				"purchaseTableLoad parse(Value = array(Value),",
+				"     format: 'json',",
+				"     documentForm: 'documentPerLine') ~> parse1"
+			]
+		}
+	}
+}
