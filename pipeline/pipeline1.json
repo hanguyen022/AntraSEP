@@ -62,7 +62,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@equals(activity('Update MasterTable').output.resultSets[0].rows[0][1].Value, 'null')",
+									"value": "@and(equals(activity('Update MasterTable').output.resultSets[0].rows[0][1].Value, 'null'), not(contains(item().t, 'null')))",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
@@ -111,11 +111,30 @@
 												"queryTimeout": "02:00:00",
 												"partitionOption": "None"
 											},
-											"enableStaging": false
+											"sink": {
+												"type": "AzureSqlSink",
+												"writeBehavior": "insert",
+												"sqlWriterUseTableLock": false
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
 										},
 										"inputs": [
 											{
 												"referenceName": "DynamicIncrementalLoad",
+												"type": "DatasetReference"
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "CopyToODSOutput",
 												"type": "DatasetReference"
 											}
 										]
