@@ -3,32 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup1",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": "Drop table if exists masterTab;\n\nCreate table masterTab (\n    ID int identity(1,1),\n    [Key] varchar(100),\n    [Value] varchar(max)\n);\n\nSELECT table_schema,table_name\nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing' \n    or table_name = 'StockItems' \n    or table_name = 'PackageTypes'\n    or table_name = 'TransactionTypes'\n    or table_name = 'PaymentMethods'\n    or table_name = 'People'\n",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "randomWWITab",
-						"type": "DatasetReference"
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
 				"name": "Update MasterTable",
 				"type": "Script",
 				"dependsOn": [
@@ -55,52 +29,9 @@
 					"scripts": [
 						{
 							"type": "Query",
-							"text": "Insert into masterTab ([Key], [Value])\nValues ('Purchase_table_load','@{activity('Lookup1').output.value}'),\n        ('Purchase_time_load', null)\nSelect * from masterTab "
-						}
-					]
-				}
-			},
-			{
-				"name": "If Condition1",
-				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "ForEach1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@equals(activity('Update MasterTable').output.resultSets[0].rows[0][1].Value, 'null')",
-						"type": "Expression"
-					},
-					"ifFalseActivities": [
-						{
-							"name": "Lookup2",
-							"type": "Lookup",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": "Select  *\nFrom Purchasing.Suppliers\nWhere Valid_from > (Select [Value] From masterTab Where [Key] = 'Purchase_load_time' and [Value] is notnull)\n",
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "randomWWITab",
-									"type": "DatasetReference"
-								}
+							"text": {
+								"value": "Insert into masterTable ([Key], [Value])\nValues ('Purchase_table_load','@{activity('Lookup1').output.value}'),\n        ('Purchase_time_load', null)\nSelect * from masterTable",
+								"type": "Expression"
 							}
 						}
 					]
@@ -122,13 +53,115 @@
 					"items": {
 						"value": "@activity('Lookup1').output.value",
 						"type": "Expression"
-					}
+					},
+					"activities": [
+						{
+							"name": "If Condition1_copy1",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(activity('Update MasterTable').output.resultSets[0].rows[0][1].Value, 'null')",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Lookup2_copy1",
+										"type": "Lookup",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": "Select  *\nFrom Purchasing.Suppliers\nWhere Valid_from > (Select [Value] From masterTab Where [Key] = 'Purchase_load_time' and [Value] is notnull)\n",
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "randomWWITab",
+												"type": "DatasetReference"
+											}
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "FullLoad",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "DynamicIncrementalLoad",
+												"type": "DatasetReference"
+											}
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "Drop table if exists masterTable;\n\nCreate table masterTable (\n    ID int identity(1,1),\n    [Key] varchar(100),\n    [Value] varchar(max)\n);\n\nSELECT concat(table_schema,'.',table_name) as t\nFROM information_schema.TABLES \nWHERE table_schema= 'Purchasing' \n    or table_name = 'StockItems' \n    or table_name = 'PackageTypes'\n    or table_name = 'TransactionTypes'\n    or table_name = 'PaymentMethods'\n    or table_name = 'People'\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "randomWWITab",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
 				}
 			}
 		],
 		"variables": {
 			"table": {
 				"type": "Array"
+			},
+			"tab": {
+				"type": "Array"
+			},
+			"watermark": {
+				"type": "String"
 			}
 		},
 		"annotations": []
