@@ -1,0 +1,17 @@
+{
+	"name": "DynamicIncrementalLoad",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "wwiStandard",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"table": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}
